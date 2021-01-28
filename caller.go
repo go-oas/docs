@@ -1,18 +1,23 @@
 package docs
 
 import (
-	"errors"
+	"fmt"
 	"reflect"
 )
 
+// FIXME: Complete file needs attention.
+
 func (o *OAS) Call(name string, params ...interface{}) (result []reflect.Value, err error) {
 	f := reflect.ValueOf(o.registeredRoutes[name])
-	if len(params) != f.Type().NumIn() {
-		err = errors.New("the number of params is not adapted")
+	paramNum := len(params)
+	fnParamNum := f.Type().NumIn()
+
+	if paramNum != fnParamNum {
+		err = fmt.Errorf("param number differs -> expected %d, got %d", paramNum, fnParamNum)
 		return //nolint: nakedret //implemetation speed. fixme: upgrade.
 	}
 
-	in := make([]reflect.Value, len(params))
+	in := make([]reflect.Value, paramNum)
 	for k, param := range params {
 		in[k] = reflect.ValueOf(param)
 	}
@@ -22,6 +27,7 @@ func (o *OAS) Call(name string, params ...interface{}) (result []reflect.Value, 
 	return //nolint: nakedret //implemetation speed. fixme: upgrade.
 }
 
+// should this be flexible for change?
 const routePostfix = "Route"
 
 func (o *OAS) initCallStackForRoutes() error {

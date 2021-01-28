@@ -7,6 +7,8 @@ import (
 func main() {
 	apiDoc := docs.New()
 
+	apiDoc.OASVersion = "3.0.1"
+
 	apiDoc.Info = docs.Info{
 		Title:          "Build OAS3.0.1",
 		Description:    "Description - Builder Testing for OAS3.0.1",
@@ -16,7 +18,7 @@ func main() {
 		},
 		License: docs.License{
 			Name: "MIT",
-			URL:  "https://mit.edu.com",
+			URL:  "https://github.com/go-oas/docs/blob/main/LICENSE",
 		},
 		Version: "0.0.1",
 	}
@@ -80,12 +82,10 @@ func main() {
 		},
 	}
 
-	routes := []interface{}{
+	apiDoc.AttachRoutes([]interface{}{
 		handleCreateUserRoute,
 		handleGetUserRoute,
-	}
-
-	apiDoc.AttachRoutes(routes)
+	})
 
 	err := apiDoc.MapAnnotationsInPath("./examples/users_example")
 	if err != nil {

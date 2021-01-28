@@ -14,7 +14,6 @@ func New() OAS {
 	initRoutes := RegRoutes{}
 
 	return OAS{
-		OASVersion:       "3.0.1",
 		registeredRoutes: initRoutes,
 	}
 }
@@ -85,7 +84,7 @@ func scanForChangesInPath(handlersPath string) ([]string, error) {
 
 const OASAnnotationInit = "// @OAS "
 
-func (o *OAS) MapDocAnnotations(path string) error {
+func (o *OAS) mapDocAnnotations(path string) error {
 	if o == nil {
 		return errors.New("ptr to OASHandlers can not be nil")
 	}
@@ -96,7 +95,6 @@ func (o *OAS) MapDocAnnotations(path string) error {
 	}
 	defer f.Close() // FIXME: Consume this error.
 
-	// Splits on newlines by default.
 	scanner := bufio.NewScanner(f)
 
 	line := 1

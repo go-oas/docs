@@ -17,7 +17,7 @@ func (o *OAS) BuildDocs(customOutPath string) error {
 		return fmt.Errorf("failed initiating call stack for registered routes: %w", err)
 	}
 
-	transformedOAS := o.TransformToMap()
+	transformedOAS := o.transformToMap()
 
 	yml, err := yaml.Marshal(transformedOAS)
 	if err != nil {
@@ -51,7 +51,9 @@ type (
 	pathSecurityMap map[string][]string
 )
 
-func (o *OAS) TransformToMap() map[string]interface{} {
+// FIXME: Validations and refactoring needed.
+// Ditch interface{} in place for concrete types.
+func (o *OAS) transformToMap() map[string]interface{} {
 	oasPrep := make(map[string]interface{})
 
 	oasPrep["openapi"] = o.OASVersion
@@ -67,15 +69,10 @@ func (o *OAS) TransformToMap() map[string]interface{} {
 			allPaths[path.Route] = make(methodsMap)
 		}
 
-		// START: REQUEST BODY MAP
-
 		reqBodyMap := make(map[string]interface{})
 		reqBodyMap["description"] = path.RequestBody.Description
 		reqBodyMap["content"] = makeContentSchemaMap(path.RequestBody.Content)
 
-		// END: REQUEST BODY MAP
-
-		// START: RESPONSE BODY MAP
 		responsesMap := make(map[uint]interface{})
 		for _, resp := range path.Responses {
 			codeBodyMap := make(map[string]interface{})
@@ -84,9 +81,7 @@ func (o *OAS) TransformToMap() map[string]interface{} {
 
 			responsesMap[resp.Code] = codeBodyMap
 		}
-		// END: RESPONSE BODY MAP
 
-		// START: SECURITY MAPS
 		var securityMaps []pathSecurityMap
 		for _, sec := range path.Security {
 			inner := make(pathSecurityMap)
@@ -94,7 +89,6 @@ func (o *OAS) TransformToMap() map[string]interface{} {
 
 			securityMaps = append(securityMaps, inner)
 		}
-		// END: SECURITY MAPS
 
 		pathMap := make(map[string]interface{})
 		pathMap["tags"] = path.Tags

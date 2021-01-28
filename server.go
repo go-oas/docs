@@ -1,24 +1,31 @@
 package docs
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
 )
 
-func ServeSwaggerUI(route, port string) {
-	directory := "./internal/dist"
+const (
+	defaultRoute     = "/api"
+	defaultDirectory = "./internal/dist"
+	defaultIndexPath = "/index.html"
+	fwSlashSuffix    = "/"
+)
 
+func ServeSwaggerUI(route, port string) {
 	if route == "" {
-		route = "/api/"
+		route = defaultRoute
 	}
 
-	fileServer := http.FileServer(FileSystem{http.Dir(directory)})
-	http.Handle(route, http.StripPrefix(strings.TrimRight(route, "/"), fileServer))
+	fileServer := http.FileServer(FileSystem{http.Dir(defaultDirectory)})
+	http.Handle(route, http.StripPrefix(strings.TrimRight(route, fwSlashSuffix), fileServer))
 
-	log.Printf("Serving %s on HTTP port: %s\n", directory, port)
+	log.Printf("Serving SwaggerIU on HTTP port: %s\n", port)
 
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
+	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), nil); err != nil {
+		// TODO: Add graceful shutdown/handling with err chan.
 		panic(err)
 	}
 }
@@ -34,10 +41,14 @@ func (fs FileSystem) Open(path string) (http.File, error) {
 		return nil, err
 	}
 
-	s, err := f.Stat()
-	if s.IsDir() {
-		index := strings.TrimSuffix(path, "/") + "/index.html"
-		if _, err := fs.fs.Open(index); err != nil {
+	fileInfo, err := f.Stat()
+	if err != nil {
+		return f, err
+	}
+
+	if fileInfo.IsDir() {
+		index := strings.TrimSuffix(path, fwSlashSuffix) + defaultIndexPath
+		if _, err = fs.fs.Open(index); err != nil {
 			return nil, err
 		}
 	}
