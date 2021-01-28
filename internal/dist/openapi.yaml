@@ -1,0 +1,87 @@
+components:
+    schemas:
+        User:
+            $ref: ""
+            properties:
+                - type: integer
+                  format: int64
+                  description: UserID
+                - type: bool
+                  description: isActive
+                  default: true
+            type: object
+    securitySchemes:
+        users_auth:
+            in: header
+            name: users_auth
+            type: apiKey
+externalDocs:
+    description: External documentation
+    url: https://kaynetik.com
+info:
+    title: Build OAS3.0.1
+    description: Description - Builder Testing for OAS3.0.1
+    termsOfService: ToS LoremIpsum
+    contact:
+        email: nesovic@protonmail.com
+    license:
+        name: MIT
+        url: https://mit.edu.com
+    version: 0.0.1
+openapi: 3.0.1
+paths:
+    /users:
+        get:
+            operationId: getUser
+            requestBody:
+                content: {}
+                description: ""
+            responses:
+                200:
+                    content: {}
+                    description: OK
+            security: []
+            summary: Get a User
+            tags:
+                - pet
+        post:
+            operationId: createUser
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Pet'
+                description: Create a new User
+            responses:
+                200:
+                    content: {}
+                    description: OK
+                404:
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Pet'
+                    description: Not Found
+            security:
+                - users_auth:
+                    - write:users
+                    - read:users
+                - deauth_users:
+                    - execute:users
+            summary: Create a new User
+            tags:
+                - user
+servers:
+    - url: https://petstore.swagger.io/v2
+    - url: http://petstore.swagger.io/v2
+tags:
+    - name: user
+      description: Operations about the User
+      externalDocs:
+        description: ""
+        url: ""
+    - name: pet
+      description: Pet Store example
+      externalDocs:
+        description: Find out more about our store
+        url: http://swagger.io
