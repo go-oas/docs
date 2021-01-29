@@ -58,7 +58,8 @@ func (o *OAS) GetPathByIndex(index int) *Path {
 	return &o.Paths[index]
 }
 
-// scanForChangesInPath scans for annotations changes on handlers in passed path, which is relative to the caller's point of view.
+// scanForChangesInPath scans for annotations changes on handlers in passed path,
+// which is relative to the caller's point of view.
 func scanForChangesInPath(handlersPath string) (files []string, err error) {
 	currentPath, err := os.Getwd()
 	if err != nil {
@@ -89,7 +90,7 @@ func walkFilepath(pathToTraverse string) ([]string, error) {
 		return nil
 	})
 	if err != nil {
-		return files, err //nolint: wrapcheck // it will be wrapped by consumer.
+		return files, err //nolint:wrapcheck //it will be wrapped by consumer.
 	}
 
 	return files, nil
@@ -109,6 +110,7 @@ func (o *OAS) mapDocAnnotations(path string) error {
 	scanner := bufio.NewScanner(f)
 
 	line := 1
+
 	for scanner.Scan() {
 		mapIfLineContainsOASTag(scanner.Text(), o)
 		line++

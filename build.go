@@ -64,8 +64,8 @@ func (o *OAS) transformToMap() map[string]interface{} {
 	oasPrep["tags"] = o.Tags
 
 	// FIXME: All will need validations, e.g. if doesn't exist in the struct, then don't register the key in map...
-	allPaths := make(pathsMap)
-	for _, path := range o.Paths {
+	allPaths := make(pathsMap, len(o.Paths))
+	for _, path := range o.Paths { //nolint:gocritic //consider indexing?
 		if allPaths[path.Route] == nil {
 			allPaths[path.Route] = make(methodsMap)
 		}
@@ -75,6 +75,7 @@ func (o *OAS) transformToMap() map[string]interface{} {
 		reqBodyMap["content"] = makeContentSchemaMap(path.RequestBody.Content)
 
 		responsesMap := make(map[uint]interface{})
+
 		for _, resp := range path.Responses {
 			codeBodyMap := make(map[string]interface{})
 			codeBodyMap["description"] = resp.Description
@@ -84,6 +85,7 @@ func (o *OAS) transformToMap() map[string]interface{} {
 		}
 
 		var securityMaps []pathSecurityMap
+
 		for _, sec := range path.Security {
 			inner := make(pathSecurityMap)
 			inner[sec.AuthName] = sec.PermTypes
@@ -105,8 +107,10 @@ func (o *OAS) transformToMap() map[string]interface{} {
 	oasPrep["paths"] = allPaths
 
 	componentsMap := make(map[string]interface{})
+
 	for _, cm := range o.Components {
 		schemesMap := make(map[string]interface{})
+
 		for _, s := range cm.Schemas {
 			scheme := make(map[string]interface{})
 			scheme["type"] = s.Type
@@ -121,10 +125,12 @@ func (o *OAS) transformToMap() map[string]interface{} {
 		}
 
 		secSchemesMap := make(map[string]interface{})
+
 		for _, ss := range cm.SecuritySchemes {
 			scheme := make(map[string]interface{})
 			scheme["name"] = ss.Name
 			scheme["type"] = ss.Type
+
 			if ss.In != "" {
 				scheme["in"] = ss.In
 			}

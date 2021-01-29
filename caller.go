@@ -13,8 +13,10 @@ func (o *OAS) Call(name string, params ...interface{}) (result []reflect.Value, 
 	fnParamNum := f.Type().NumIn()
 
 	if paramNum != fnParamNum {
-		err = fmt.Errorf("param number differs -> expected %d, got %d", paramNum, fnParamNum)
-		return result, err
+		return result, fmt.Errorf( //nolint:goerr113
+			"param number differs -> expected %d, got %d",
+			paramNum, fnParamNum,
+		)
 	}
 
 	in := make([]reflect.Value, paramNum)
