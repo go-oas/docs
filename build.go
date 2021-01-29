@@ -74,7 +74,7 @@ func (o *OAS) transformToMap() map[string]interface{} {
 		reqBodyMap["description"] = path.RequestBody.Description
 		reqBodyMap["content"] = makeContentSchemaMap(path.RequestBody.Content)
 
-		responsesMap := make(map[uint]interface{})
+		responsesMap := make(map[uint]interface{}, len(path.Responses))
 
 		for _, resp := range path.Responses {
 			codeBodyMap := make(map[string]interface{})
@@ -106,10 +106,10 @@ func (o *OAS) transformToMap() map[string]interface{} {
 
 	oasPrep["paths"] = allPaths
 
-	componentsMap := make(map[string]interface{})
+	componentsMap := make(map[string]interface{}, len(o.Components))
 
 	for _, cm := range o.Components {
-		schemesMap := make(map[string]interface{})
+		schemesMap := make(map[string]interface{}, len(cm.Schemas))
 
 		for _, s := range cm.Schemas {
 			scheme := make(map[string]interface{})
@@ -124,7 +124,7 @@ func (o *OAS) transformToMap() map[string]interface{} {
 			schemesMap[s.Name] = scheme
 		}
 
-		secSchemesMap := make(map[string]interface{})
+		secSchemesMap := make(map[string]interface{}, len(cm.SecuritySchemes))
 
 		for _, ss := range cm.SecuritySchemes {
 			scheme := make(map[string]interface{})
@@ -151,10 +151,10 @@ func makeContentSchemaMap(content ContentTypes) map[string]interface{} {
 	contentSchemaMap := make(map[string]interface{})
 
 	for _, ct := range content {
-		refMap := make(map[string]interface{})
+		refMap := make(map[string]string)
 		refMap["$ref"] = ct.Schema
 
-		schemaMap := make(map[string]interface{})
+		schemaMap := make(map[string]map[string]string)
 		schemaMap["schema"] = refMap
 
 		contentSchemaMap[ct.Name] = schemaMap
