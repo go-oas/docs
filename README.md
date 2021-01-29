@@ -15,5 +15,4 @@ release.
 
 ### :tada: Credits
 
-1. Thanks to a dear colleague of mine [@Law Zava](https://github.com/lawzava) for the inspiration to make an OpenSource
-   contribution.
+1. Thanks to [@Law Zava](https://github.com/lawzava) for the inspiration to make an OpenSource contribution.
