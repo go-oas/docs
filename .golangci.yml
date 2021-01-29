@@ -78,7 +78,7 @@ linters:
     - goheader
     - noctx
     - sqlclosecheck
-    - nlreturn
+    #    - nlreturn
     - errorlint
     - exhaustivestruct
     - paralleltest

@@ -3,6 +3,7 @@ package docs
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -17,6 +18,11 @@ func New() OAS {
 		registeredRoutes: initRoutes,
 	}
 }
+
+const (
+	goFileExt         = ".go"
+	OASAnnotationInit = "// @OAS "
+)
 
 // OAS - represents Open API Specification structure, in its approximated Go form.
 type OAS struct {
@@ -53,22 +59,29 @@ func (o *OAS) GetPathByIndex(index int) *Path {
 }
 
 // scanForChangesInPath scans for annotations changes on handlers in passed path, which is relative to the caller's point of view.
-func scanForChangesInPath(handlersPath string) ([]string, error) {
-	var files []string
-
+func scanForChangesInPath(handlersPath string) (files []string, err error) {
 	currentPath, err := os.Getwd()
 	if err != nil {
-		return files, err
+		return files, fmt.Errorf("failed getting current working directory: %w", err)
 	}
 
-	pathToScan := filepath.Join(currentPath, handlersPath)
+	files, err = walkFilepath(filepath.Join(currentPath, handlersPath))
+	if err != nil {
+		return files, fmt.Errorf("failed walking tree of the given path: %w", err)
+	}
 
-	err = filepath.Walk(pathToScan, func(path string, info os.FileInfo, err error) error {
+	return files, nil
+}
+
+func walkFilepath(pathToTraverse string) ([]string, error) {
+	var files []string
+
+	err := filepath.Walk(pathToTraverse, func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {
 			return nil
 		}
 
-		if filepath.Ext(path) != ".go" {
+		if filepath.Ext(path) != goFileExt {
 			return nil
 		}
 
@@ -76,53 +89,50 @@ func scanForChangesInPath(handlersPath string) ([]string, error) {
 		return nil
 	})
 	if err != nil {
-		panic(err)
+		return files, err //nolint: wrapcheck // it will be wrapped by consumer.
 	}
 
 	return files, nil
 }
 
-const OASAnnotationInit = "// @OAS "
-
 func (o *OAS) mapDocAnnotations(path string) error {
 	if o == nil {
-		return errors.New("ptr to OASHandlers can not be nil")
+		return errors.New("pointer to OASHandlers can not be nil") // fixme: migrate to validator!
 	}
 
 	f, err := os.Open(path)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to open file in path %s :%w", path, err)
 	}
 	defer f.Close() // FIXME: Consume this error.
 
 	scanner := bufio.NewScanner(f)
 
 	line := 1
-
 	for scanner.Scan() {
-		lineText := scanner.Text()
-		if strings.Contains(lineText, OASAnnotationInit) {
-			// TODO: Can this be more performance cautious?
-			fields := strings.Fields(lineText)
-
-			// TODO: Implement getters for these fields?
-			var newRoute Path
-			newRoute.handlerFuncName = fields[2]
-			newRoute.Route = fields[3]
-			newRoute.HTTPMethod = fields[4]
-
-			o.Paths = append(o.Paths, newRoute)
-
-			return nil
-		}
-
+		mapIfLineContainsOASTag(scanner.Text(), o)
 		line++
 	}
 
 	err = scanner.Err()
 	if err != nil {
-		return err
+		return fmt.Errorf("scanner failure :%w", err)
 	}
 
 	return nil
+}
+
+func mapIfLineContainsOASTag(lineText string, o *OAS) {
+	if strings.Contains(lineText, OASAnnotationInit) {
+		// TODO: Can this be more performance cautious?
+		fields := strings.Fields(lineText)
+
+		// TODO: Implement getters for these fields?
+		var newRoute Path
+		newRoute.handlerFuncName = fields[2]
+		newRoute.Route = fields[3]
+		newRoute.HTTPMethod = fields[4]
+
+		o.Paths = append(o.Paths, newRoute)
+	}
 }
