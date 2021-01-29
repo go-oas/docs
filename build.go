@@ -3,9 +3,10 @@ package docs
 import (
 	"bufio"
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"os"
 	"strings"
+
+	"gopkg.in/yaml.v3"
 )
 
 const docsOutPath = "./internal/dist/openapi.yaml"

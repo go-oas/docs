@@ -31,25 +31,26 @@ func ServeSwaggerUI(route, port string) {
 }
 
 type FileSystem struct {
+	// fs is wrapped to avoid unwanted dir traversal.
 	fs http.FileSystem
 }
 
-// Open opens file
+// Open opens file. Returns http.File, and error if there is any.
 func (fs FileSystem) Open(path string) (http.File, error) {
 	f, err := fs.fs.Open(path)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to open file in path %s :%w", path, err)
 	}
 
 	fileInfo, err := f.Stat()
 	if err != nil {
-		return f, err
+		return f, fmt.Errorf("failed to fetch file info :%w", err)
 	}
 
 	if fileInfo.IsDir() {
 		index := strings.TrimSuffix(path, fwSlashSuffix) + defaultIndexPath
 		if _, err = fs.fs.Open(index); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed trimming path sufix :%w", err)
 		}
 	}
 
