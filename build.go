@@ -47,9 +47,10 @@ func (o *OAS) BuildDocs(customOutPath string) error {
 }
 
 type (
-	pathsMap        map[string]methodsMap
-	methodsMap      map[string]interface{}
-	pathSecurityMap map[string][]string
+	pathsMap         map[string]methodsMap
+	methodsMap       map[string]interface{}
+	pathSecurityMap  map[string][]string
+	pathSecurityMaps []pathSecurityMap
 )
 
 // TODO: Validations and refactoring needed.
@@ -62,50 +63,43 @@ func (o *OAS) transformToMap() map[string]interface{} {
 	oasPrep["servers"] = o.Servers
 	oasPrep["tags"] = o.Tags
 
-	allPaths := makeAllPathsMap(&o.Paths)
-	oasPrep["paths"] = *allPaths
-
-	componentsMap := makeComponentsMap(&o.Components)
-	oasPrep["components"] = *componentsMap
+	oasPrep["paths"] = makeAllPathsMap(&o.Paths)
+	oasPrep["components"] = makeComponentsMap(&o.Components)
 
 	return oasPrep
 }
 
-func makeAllPathsMap(paths *Paths) *pathsMap {
+func makeAllPathsMap(paths *Paths) pathsMap {
 	allPaths := make(pathsMap, len(*paths))
 	for _, path := range *paths { //nolint:gocritic //consider indexing?
 		if allPaths[path.Route] == nil {
 			allPaths[path.Route] = make(methodsMap)
 		}
 
-		reqBodyMap := makeRequestBodyMap(&path.RequestBody)
-		responsesMap := makeResponsesMap(&path.Responses)
-		securityMaps := makeSecurityMap(&path.Security)
-
 		pathMap := make(map[string]interface{})
 		pathMap["tags"] = path.Tags
 		pathMap["summary"] = path.Summary
 		pathMap["operationId"] = path.OperationID
-		pathMap["security"] = *securityMaps
-		pathMap["requestBody"] = *reqBodyMap
-		pathMap["responses"] = *responsesMap
+		pathMap["security"] = makeSecurityMap(&path.Security)
+		pathMap["requestBody"] = makeRequestBodyMap(&path.RequestBody)
+		pathMap["responses"] = makeResponsesMap(&path.Responses)
 
 		allPaths[path.Route][strings.ToLower(path.HTTPMethod)] = pathMap
 	}
 
-	return &allPaths
+	return allPaths
 }
 
-func makeRequestBodyMap(reqBody *RequestBody) *map[string]interface{} {
+func makeRequestBodyMap(reqBody *RequestBody) map[string]interface{} {
 	reqBodyMap := make(map[string]interface{})
 
 	reqBodyMap["description"] = reqBody.Description
 	reqBodyMap["content"] = makeContentSchemaMap(reqBody.Content)
 
-	return &reqBodyMap
+	return reqBodyMap
 }
 
-func makeResponsesMap(responses *Responses) *map[uint]interface{} {
+func makeResponsesMap(responses *Responses) map[uint]interface{} {
 	responsesMap := make(map[uint]interface{}, len(*responses))
 
 	for _, resp := range *responses {
@@ -116,11 +110,11 @@ func makeResponsesMap(responses *Responses) *map[uint]interface{} {
 		responsesMap[resp.Code] = codeBodyMap
 	}
 
-	return &responsesMap
+	return responsesMap
 }
 
-func makeSecurityMap(se *SecurityEntities) *[]pathSecurityMap {
-	var securityMaps []pathSecurityMap
+func makeSecurityMap(se *SecurityEntities) pathSecurityMaps {
+	securityMaps := make(pathSecurityMaps, 0, len(*se))
 
 	for _, sec := range *se {
 		securityMap := make(pathSecurityMap)
@@ -129,7 +123,7 @@ func makeSecurityMap(se *SecurityEntities) *[]pathSecurityMap {
 		securityMaps = append(securityMaps, securityMap)
 	}
 
-	return &securityMaps
+	return securityMaps
 }
 
 func makeContentSchemaMap(content ContentTypes) map[string]interface{} {
@@ -148,21 +142,18 @@ func makeContentSchemaMap(content ContentTypes) map[string]interface{} {
 	return contentSchemaMap
 }
 
-func makeComponentsMap(components *Components) *map[string]interface{} {
+func makeComponentsMap(components *Components) map[string]interface{} {
 	componentsMap := make(map[string]interface{}, len(*components))
 
 	for _, cm := range *components {
-		schemesMap := makeComponentSchemasMap(&cm.Schemas)
-		secSchemesMap := makeComponentSecuritySchemesMap(&cm.SecuritySchemes)
-
-		componentsMap["schemas"] = *schemesMap
-		componentsMap["securitySchemes"] = *secSchemesMap
+		componentsMap["schemas"] = makeComponentSchemasMap(&cm.Schemas)
+		componentsMap["securitySchemes"] = makeComponentSecuritySchemesMap(&cm.SecuritySchemes)
 	}
 
-	return &componentsMap
+	return componentsMap
 }
 
-func makeComponentSchemasMap(schemas *Schemas) *map[string]interface{} {
+func makeComponentSchemasMap(schemas *Schemas) map[string]interface{} {
 	schemesMap := make(map[string]interface{}, len(*schemas))
 
 	for _, s := range *schemas {
@@ -178,10 +169,10 @@ func makeComponentSchemasMap(schemas *Schemas) *map[string]interface{} {
 		schemesMap[s.Name] = scheme
 	}
 
-	return &schemesMap
+	return schemesMap
 }
 
-func makeComponentSecuritySchemesMap(secSchemes *SecuritySchemes) *map[string]interface{} {
+func makeComponentSecuritySchemesMap(secSchemes *SecuritySchemes) map[string]interface{} {
 	secSchemesMap := make(map[string]interface{}, len(*secSchemes))
 
 	for _, ss := range *secSchemes {
@@ -196,5 +187,5 @@ func makeComponentSecuritySchemesMap(secSchemes *SecuritySchemes) *map[string]in
 		secSchemesMap[ss.Name] = scheme
 	}
 
-	return &secSchemesMap
+	return secSchemesMap
 }
