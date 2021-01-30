@@ -1,4 +1,4 @@
-name: Golang
+name: Build
 on: [ push ]
 env:
   GO111MODULE: on
