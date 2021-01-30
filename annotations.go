@@ -105,7 +105,7 @@ func mapIfLineContainsOASTag(lineText string, o *OAS) {
 
 		// TODO: Implement getters for these fields?
 		var newRoute Path
-		newRoute.handlerFuncName = fields[2]
+		newRoute.HandlerFuncName = fields[2]
 		newRoute.Route = fields[3]
 		newRoute.HTTPMethod = fields[4]
 

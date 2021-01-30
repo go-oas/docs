@@ -4,7 +4,7 @@ func New() OAS {
 	initRoutes := RegRoutes{}
 
 	return OAS{
-		registeredRoutes: initRoutes,
+		RegisteredRoutes: initRoutes,
 	}
 }
 
@@ -14,15 +14,14 @@ const (
 
 // OAS - represents Open API Specification structure, in its approximated Go form.
 type OAS struct {
-	OASVersion   OASVersion   `yaml:"openapi"`
-	Info         Info         `yaml:"info"`
-	ExternalDocs ExternalDocs `yaml:"externalDocs"`
-	Servers      Servers      `yaml:"servers"`
-	Tags         Tags         `yaml:"tags"`
-	Paths        Paths        `yaml:"paths"`
-	Components   Components   `yaml:"components"`
-
-	registeredRoutes RegRoutes `yaml:"-"`
+	OASVersion       OASVersion   `yaml:"openapi"`
+	Info             Info         `yaml:"info"`
+	ExternalDocs     ExternalDocs `yaml:"externalDocs"`
+	Servers          Servers      `yaml:"servers"`
+	Tags             Tags         `yaml:"tags"`
+	Paths            Paths        `yaml:"paths"`
+	Components       Components   `yaml:"components"`
+	RegisteredRoutes RegRoutes    `yaml:"-"`
 }
 
 // Version is represented in SemVer format.
@@ -72,16 +71,15 @@ type Tag struct {
 type Paths []Path
 
 type Path struct {
-	Route       string           `yaml:"route"`
-	HTTPMethod  string           `yaml:"httpMethod"`
-	Tags        []string         `yaml:"tags"`
-	Summary     string           `yaml:"summary"`
-	OperationID string           `yaml:"operationId"`
-	RequestBody RequestBody      `yaml:"requestBody"`
-	Responses   Responses        `yaml:"responses"`
-	Security    SecurityEntities `yaml:"security,omitempty"`
-
-	handlerFuncName string `yaml:"-"`
+	Route           string           `yaml:"route"`
+	HTTPMethod      string           `yaml:"httpMethod"`
+	Tags            []string         `yaml:"tags"`
+	Summary         string           `yaml:"summary"`
+	OperationID     string           `yaml:"operationId"`
+	RequestBody     RequestBody      `yaml:"requestBody"`
+	Responses       Responses        `yaml:"responses"`
+	Security        SecurityEntities `yaml:"security,omitempty"`
+	HandlerFuncName string           `yaml:"-"`
 }
 
 type RequestBody struct {

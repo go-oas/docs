@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+	"testing/quick"
 	"time"
 )
 
@@ -68,7 +69,7 @@ func TestUnitGetRegisteredRoutes(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			o := &OAS{
-				registeredRoutes: tt.fields.registeredRoutes,
+				RegisteredRoutes: tt.fields.registeredRoutes,
 			}
 			if got := o.GetRegisteredRoutes(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetRegisteredRoutes() = %v, want %v", got, tt.want)
@@ -111,7 +112,7 @@ func TestUnitGetPathByIndex(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			o := &OAS{
 				Paths:            tt.fields.Paths,
-				registeredRoutes: tt.fields.registeredRoutes,
+				RegisteredRoutes: tt.fields.registeredRoutes,
 			}
 			if got := o.GetPathByIndex(0); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetPathByIndex() = %v, want %v", got, tt.want)
@@ -124,7 +125,7 @@ func TestUnitAttachRoutes(t *testing.T) {
 	rr := make(RegRoutes)
 
 	o := OAS{
-		registeredRoutes: rr,
+		RegisteredRoutes: rr,
 	}
 
 	routes := []interface{}{
@@ -138,10 +139,122 @@ func TestUnitAttachRoutes(t *testing.T) {
 		fnDeclaration := runtime.FuncForPC(reflect.ValueOf(routeFn).Pointer()).Name()
 		fields := strings.SplitAfter(fnDeclaration, ".")
 		fnName := fields[len(fields)-1]
-		got := o.registeredRoutes[fnName]
+		got := o.RegisteredRoutes[fnName]
 
 		if reflect.ValueOf(got) != reflect.ValueOf(routeFn) {
 			t.Errorf("invalid route fn attached: got %v, want %v", got, routeFn)
 		}
 	}
+}
+
+func TestQuickUnitGetRegisteredRoutes(t *testing.T) {
+	config := quick.Config{
+		Values: func(args []reflect.Value, rand *rand.Rand) {
+			oas := OAS{
+				RegisteredRoutes: map[string]interface{}{},
+			}
+			args[0] = reflect.ValueOf(oas)
+		},
+	}
+
+	gotRegRoutes := func(oas OAS) bool {
+		got := oas.GetRegisteredRoutes()
+
+		if !reflect.DeepEqual(got, oas.RegisteredRoutes) {
+			return false
+		}
+
+		return true
+	}
+
+	if err := quick.Check(gotRegRoutes, &config); err != nil {
+		t.Errorf("Check failed: %#v", err)
+	}
+}
+
+func TestQuickUnitGetPathByIndex(t *testing.T) {
+	paths := func(count int, rndStr string) Paths {
+		pt := make(Paths, count+2)
+
+		for i := 0; i < count+1; i++ {
+			pt = append(pt, Path{
+				Route:      rndStr,
+				HTTPMethod: http.MethodGet,
+			})
+		}
+
+		return pt
+	}
+
+	config := quick.Config{
+		Values: func(args []reflect.Value, rand *rand.Rand) {
+			count := rand.Intn(550-1) + 1
+			oas := OAS{
+				Paths: paths(count, RandomString(count)),
+			}
+
+			args[0] = reflect.ValueOf(oas)
+		},
+	}
+
+	gotRegRoutes := func(oas OAS) bool {
+		randIndex := uint(len(oas.Paths) - rand.Intn(len(oas.Paths)-2))
+
+		got := oas.GetPathByIndex(int(randIndex))
+
+		if !reflect.DeepEqual(got, &oas.Paths[randIndex]) {
+			return false
+		}
+
+		return true
+	}
+
+	if err := quick.Check(gotRegRoutes, &config); err != nil {
+		t.Errorf("Check failed: %#v", err)
+	}
+}
+
+func RandomString(n int) string {
+	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+
+	s := make([]rune, n)
+	for i := range s {
+		s[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(s)
+}
+
+func TestQuickUnitAttachRoutes(t *testing.T) {
+	config := quick.Config{
+		Values: func(args []reflect.Value, rand *rand.Rand) {
+			rr := make(RegRoutes)
+
+			oas := OAS{
+				RegisteredRoutes: rr,
+			}
+
+			routes := []interface{}{
+				fetchRegRoutes,
+				initRoutes,
+			}
+
+			args[0] = reflect.ValueOf(oas)
+			args[1] = reflect.ValueOf(routes)
+		},
+	}
+
+	gotRegRoutes := func(oas OAS, routes []interface{}) bool {
+		oas.AttachRoutes(routes)
+		got := oas.GetRegisteredRoutes()
+
+		if !reflect.DeepEqual(got, oas.RegisteredRoutes) {
+			return false
+		}
+
+		return true
+	}
+	if err := quick.Check(gotRegRoutes, &config); err != nil {
+		t.Errorf("Check failed: %#v", err)
+	}
+
 }

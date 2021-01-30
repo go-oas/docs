@@ -15,12 +15,12 @@ func (o *OAS) AttachRoutes(fns []interface{}) {
 		fields := strings.SplitAfter(fnDeclaration, ".")
 		fnName := fields[len(fields)-1]
 
-		o.registeredRoutes[fnName] = fn
+		o.RegisteredRoutes[fnName] = fn
 	}
 }
 
 func (o *OAS) GetRegisteredRoutes() RegRoutes {
-	return o.registeredRoutes
+	return o.RegisteredRoutes
 }
 
 func (o *OAS) GetPathByIndex(index int) *Path {

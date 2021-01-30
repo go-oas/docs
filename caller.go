@@ -8,7 +8,7 @@ import (
 // FIXME: Complete file needs attention.
 
 func (o *OAS) Call(name string, params ...interface{}) (result []reflect.Value, err error) {
-	f := reflect.ValueOf(o.registeredRoutes[name])
+	f := reflect.ValueOf(o.RegisteredRoutes[name])
 	paramNum := len(params)
 	fnParamNum := f.Type().NumIn()
 
@@ -34,7 +34,7 @@ const routePostfix = "Route"
 
 func (o *OAS) initCallStackForRoutes() error {
 	for oasPathIndex, oasPath := range o.Paths { //nolint:gocritic //fixme: troubleshoot if this will be an issue.
-		_, err := o.Call(oasPath.handlerFuncName+routePostfix, oasPathIndex, o)
+		_, err := o.Call(oasPath.HandlerFuncName+routePostfix, oasPathIndex, o)
 		if err != nil {
 			return fmt.Errorf(" :%w", err)
 		}
