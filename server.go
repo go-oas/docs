@@ -24,7 +24,7 @@ func ServeSwaggerUI(conf *ConfigSwaggerUI) error {
 		return errors.New("swagger config is required")
 	}
 
-	var route = conf.Route
+	route := conf.Route
 
 	if route == "" {
 		route = defaultRoute
@@ -36,8 +36,7 @@ func ServeSwaggerUI(conf *ConfigSwaggerUI) error {
 	log.Printf("Serving SwaggerIU on HTTP port: %s\n", conf.Port)
 
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", conf.Port), nil); err != nil {
-		// TODO: Add graceful shutdown/handling with err chan.
-		return err
+		return fmt.Errorf("an error occurred while serving SwaggerUI: %w", err)
 	}
 
 	return nil

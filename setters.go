@@ -15,7 +15,7 @@ func (i *Info) SetContact(email string) {
 	i.Contact = Contact{Email: email}
 }
 
-// SetLicense sets the license on the Info struct
+// SetLicense sets the license on the Info struct.
 func (i *Info) SetLicense(licType, url string) {
 	i.License = License{
 		Name: licType,
