@@ -204,9 +204,9 @@ func TestQuickUnitGetPathByIndex(t *testing.T) {
 	gotRegRoutes := func(oas OAS) bool {
 		randIndex := uint(len(oas.Paths) - rand.Intn(len(oas.Paths)-2)) //nolint:gosec //ignored in tests.
 
-		got := oas.GetPathByIndex(int(randIndex))
+		got := oas.GetPathByIndex(int(randIndex - 1))
 
-		return reflect.DeepEqual(got, &oas.Paths[randIndex])
+		return reflect.DeepEqual(got, &oas.Paths[randIndex-1])
 	}
 
 	if err := quick.Check(gotRegRoutes, &config); err != nil {
