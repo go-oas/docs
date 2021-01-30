@@ -52,8 +52,7 @@ type (
 	pathSecurityMap map[string][]string
 )
 
-// FIXME: Validations and refactoring needed.
-// Ditch interface{} in place for concrete types.
+// TODO: Validations and refactoring needed.
 func (o *OAS) transformToMap() map[string]interface{} {
 	oasPrep := make(map[string]interface{})
 
@@ -63,88 +62,74 @@ func (o *OAS) transformToMap() map[string]interface{} {
 	oasPrep["servers"] = o.Servers
 	oasPrep["tags"] = o.Tags
 
-	// FIXME: All will need validations, e.g. if doesn't exist in the struct, then don't register the key in map...
-	allPaths := make(pathsMap, len(o.Paths))
-	for _, path := range o.Paths { //nolint:gocritic //consider indexing?
+	allPaths := makeAllPathsMap(&o.Paths)
+	oasPrep["paths"] = *allPaths
+
+	componentsMap := makeComponentsMap(&o.Components)
+	oasPrep["components"] = *componentsMap
+
+	return oasPrep
+}
+
+func makeAllPathsMap(paths *Paths) *pathsMap {
+	allPaths := make(pathsMap, len(*paths))
+	for _, path := range *paths { //nolint:gocritic //consider indexing?
 		if allPaths[path.Route] == nil {
 			allPaths[path.Route] = make(methodsMap)
 		}
 
-		reqBodyMap := make(map[string]interface{})
-		reqBodyMap["description"] = path.RequestBody.Description
-		reqBodyMap["content"] = makeContentSchemaMap(path.RequestBody.Content)
-
-		responsesMap := make(map[uint]interface{}, len(path.Responses))
-
-		for _, resp := range path.Responses {
-			codeBodyMap := make(map[string]interface{})
-			codeBodyMap["description"] = resp.Description
-			codeBodyMap["content"] = makeContentSchemaMap(resp.Content)
-
-			responsesMap[resp.Code] = codeBodyMap
-		}
-
-		var securityMaps []pathSecurityMap
-
-		for _, sec := range path.Security {
-			inner := make(pathSecurityMap)
-			inner[sec.AuthName] = sec.PermTypes
-
-			securityMaps = append(securityMaps, inner)
-		}
+		reqBodyMap := makeRequestBodyMap(&path.RequestBody)
+		responsesMap := makeResponsesMap(&path.Responses)
+		securityMaps := makeSecurityMap(&path.Security)
 
 		pathMap := make(map[string]interface{})
 		pathMap["tags"] = path.Tags
 		pathMap["summary"] = path.Summary
 		pathMap["operationId"] = path.OperationID
-		pathMap["security"] = securityMaps
-		pathMap["requestBody"] = reqBodyMap
-		pathMap["responses"] = responsesMap
+		pathMap["security"] = *securityMaps
+		pathMap["requestBody"] = *reqBodyMap
+		pathMap["responses"] = *responsesMap
 
 		allPaths[path.Route][strings.ToLower(path.HTTPMethod)] = pathMap
 	}
 
-	oasPrep["paths"] = allPaths
+	return &allPaths
+}
 
-	componentsMap := make(map[string]interface{}, len(o.Components))
+func makeRequestBodyMap(reqBody *RequestBody) *map[string]interface{} {
+	reqBodyMap := make(map[string]interface{})
 
-	for _, cm := range o.Components {
-		schemesMap := make(map[string]interface{}, len(cm.Schemas))
+	reqBodyMap["description"] = reqBody.Description
+	reqBodyMap["content"] = makeContentSchemaMap(reqBody.Content)
 
-		for _, s := range cm.Schemas {
-			scheme := make(map[string]interface{})
-			scheme["type"] = s.Type
-			scheme["properties"] = s.Properties
-			scheme["$ref"] = s.Ref
+	return &reqBodyMap
+}
 
-			if s.XML.Name != "" {
-				scheme["xml"] = s.XML
-			}
+func makeResponsesMap(responses *Responses) *map[uint]interface{} {
+	responsesMap := make(map[uint]interface{}, len(*responses))
 
-			schemesMap[s.Name] = scheme
-		}
+	for _, resp := range *responses {
+		codeBodyMap := make(map[string]interface{})
+		codeBodyMap["description"] = resp.Description
+		codeBodyMap["content"] = makeContentSchemaMap(resp.Content)
 
-		secSchemesMap := make(map[string]interface{}, len(cm.SecuritySchemes))
-
-		for _, ss := range cm.SecuritySchemes {
-			scheme := make(map[string]interface{})
-			scheme["name"] = ss.Name
-			scheme["type"] = ss.Type
-
-			if ss.In != "" {
-				scheme["in"] = ss.In
-			}
-
-			secSchemesMap[ss.Name] = scheme
-		}
-
-		componentsMap["schemas"] = schemesMap
-		componentsMap["securitySchemes"] = secSchemesMap
+		responsesMap[resp.Code] = codeBodyMap
 	}
 
-	oasPrep["components"] = componentsMap
+	return &responsesMap
+}
 
-	return oasPrep
+func makeSecurityMap(se *SecurityEntities) *[]pathSecurityMap {
+	var securityMaps []pathSecurityMap
+
+	for _, sec := range *se {
+		securityMap := make(pathSecurityMap)
+		securityMap[sec.AuthName] = sec.PermTypes
+
+		securityMaps = append(securityMaps, securityMap)
+	}
+
+	return &securityMaps
 }
 
 func makeContentSchemaMap(content ContentTypes) map[string]interface{} {
@@ -161,4 +146,55 @@ func makeContentSchemaMap(content ContentTypes) map[string]interface{} {
 	}
 
 	return contentSchemaMap
+}
+
+func makeComponentsMap(components *Components) *map[string]interface{} {
+	componentsMap := make(map[string]interface{}, len(*components))
+
+	for _, cm := range *components {
+		schemesMap := makeComponentSchemasMap(&cm.Schemas)
+		secSchemesMap := makeComponentSecuritySchemesMap(&cm.SecuritySchemes)
+
+		componentsMap["schemas"] = *schemesMap
+		componentsMap["securitySchemes"] = *secSchemesMap
+	}
+
+	return &componentsMap
+}
+
+func makeComponentSchemasMap(schemas *Schemas) *map[string]interface{} {
+	schemesMap := make(map[string]interface{}, len(*schemas))
+
+	for _, s := range *schemas {
+		scheme := make(map[string]interface{})
+		scheme["type"] = s.Type
+		scheme["properties"] = s.Properties
+		scheme["$ref"] = s.Ref
+
+		if s.XML.Name != "" {
+			scheme["xml"] = s.XML
+		}
+
+		schemesMap[s.Name] = scheme
+	}
+
+	return &schemesMap
+}
+
+func makeComponentSecuritySchemesMap(secSchemes *SecuritySchemes) *map[string]interface{} {
+	secSchemesMap := make(map[string]interface{}, len(*secSchemes))
+
+	for _, ss := range *secSchemes {
+		scheme := make(map[string]interface{})
+		scheme["name"] = ss.Name
+		scheme["type"] = ss.Type
+
+		if ss.In != "" {
+			scheme["in"] = ss.In
+		}
+
+		secSchemesMap[ss.Name] = scheme
+	}
+
+	return &secSchemesMap
 }

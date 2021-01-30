@@ -57,7 +57,7 @@ linters:
     - nestif
     - prealloc
     - rowserrcheck
-    - scopelint
+    #    - scopelint // Interfering with tests atm.
     - staticcheck
     - structcheck
     - stylecheck
@@ -69,9 +69,9 @@ linters:
     - whitespace
     - wsl
     - asciicheck
-#    - godox //TODO: Temporarily disabled - return before doing first release.
+    #    - godox //TODO: Temporarily disabled - return before doing first release.
     - nolintlint
-    - goerr113
+    #    - goerr113 there are issues with this one. TBD if gonna be used.
     - exhaustive
     - exportloopref
     - gofumpt
