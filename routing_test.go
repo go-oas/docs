@@ -8,32 +8,22 @@ import (
 	"strings"
 	"testing"
 	"testing/quick"
-	"time"
 )
 
-func fetchRegRoutes(count int, t *testing.T) RegRoutes {
+func fetchRegRoutes(t *testing.T, count int) RegRoutes {
 	t.Helper()
 
-	var routes = make(RegRoutes)
-	rand.Seed(time.Now().Unix())
-	//Only lowercase and £
-	charSet := []rune("ijklabcdedfpqrst£ghmno")
-	var output strings.Builder
-	length := 10
-	for i := 0; i < length; i++ {
-		random := rand.Intn(len(charSet))
-		randomChar := charSet[random]
-		output.WriteRune(randomChar)
-	}
+	routes := make(RegRoutes)
+	randStr := RandomString(t, count)
 
 	for i := 0; i < count; i++ {
-		routes[output.String()] = initRoutes(count, t)
+		routes[randStr] = initRoutes(t, count)
 	}
 
 	return routes
 }
 
-func initRoutes(count int, t *testing.T) []interface{} {
+func initRoutes(t *testing.T, count int) []interface{} {
 	t.Helper()
 
 	var routes []interface{}
@@ -46,12 +36,14 @@ func initRoutes(count int, t *testing.T) []interface{} {
 }
 
 func TestUnitGetRegisteredRoutes(t *testing.T) {
+	t.Parallel()
+
 	type fields struct {
 		registeredRoutes RegRoutes
 	}
 
-	v := rand.Intn(1000-1) + 1
-	regRoutes := fetchRegRoutes(v, t)
+	v := rand.Intn(1000-1) + 1 //nolint:gosec //ignored in tests.
+	regRoutes := fetchRegRoutes(t, v)
 
 	tests := []struct {
 		name   string
@@ -68,17 +60,24 @@ func TestUnitGetRegisteredRoutes(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			o := &OAS{
 				RegisteredRoutes: tt.fields.registeredRoutes,
 			}
-			if got := o.GetRegisteredRoutes(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetRegisteredRoutes() = %v, want %v", got, tt.want)
+			got := o.GetRegisteredRoutes()
+			want := tt.want
+
+			if !reflect.DeepEqual(got, want) {
+				t.Errorf("GetRegisteredRoutes() = %v, want %v", got, want)
 			}
 		})
 	}
 }
 
 func TestUnitGetPathByIndex(t *testing.T) {
+	t.Parallel()
+
 	type fields struct {
 		Paths            Paths
 		registeredRoutes RegRoutes
@@ -91,8 +90,8 @@ func TestUnitGetPathByIndex(t *testing.T) {
 		},
 	}
 
-	v := rand.Intn(1000-1) + 1
-	regRoutes := fetchRegRoutes(v, t)
+	v := rand.Intn(1000-1) + 1 //nolint:gosec //ignored in tests.
+	regRoutes := fetchRegRoutes(t, v)
 
 	tests := []struct {
 		name   string
@@ -110,6 +109,8 @@ func TestUnitGetPathByIndex(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			o := &OAS{
 				Paths:            tt.fields.Paths,
 				RegisteredRoutes: tt.fields.registeredRoutes,
@@ -122,6 +123,8 @@ func TestUnitGetPathByIndex(t *testing.T) {
 }
 
 func TestUnitAttachRoutes(t *testing.T) {
+	t.Parallel()
+
 	rr := make(RegRoutes)
 
 	o := OAS{
@@ -148,6 +151,8 @@ func TestUnitAttachRoutes(t *testing.T) {
 }
 
 func TestQuickUnitGetRegisteredRoutes(t *testing.T) {
+	t.Parallel()
+
 	config := quick.Config{
 		Values: func(args []reflect.Value, rand *rand.Rand) {
 			oas := OAS{
@@ -160,11 +165,7 @@ func TestQuickUnitGetRegisteredRoutes(t *testing.T) {
 	gotRegRoutes := func(oas OAS) bool {
 		got := oas.GetRegisteredRoutes()
 
-		if !reflect.DeepEqual(got, oas.RegisteredRoutes) {
-			return false
-		}
-
-		return true
+		return reflect.DeepEqual(got, oas.RegisteredRoutes)
 	}
 
 	if err := quick.Check(gotRegRoutes, &config); err != nil {
@@ -173,6 +174,8 @@ func TestQuickUnitGetRegisteredRoutes(t *testing.T) {
 }
 
 func TestQuickUnitGetPathByIndex(t *testing.T) {
+	t.Parallel()
+
 	paths := func(count int, rndStr string) Paths {
 		pt := make(Paths, count+2)
 
@@ -190,7 +193,7 @@ func TestQuickUnitGetPathByIndex(t *testing.T) {
 		Values: func(args []reflect.Value, rand *rand.Rand) {
 			count := rand.Intn(550-1) + 1
 			oas := OAS{
-				Paths: paths(count, RandomString(count)),
+				Paths: paths(count, RandomString(t, count)),
 			}
 
 			args[0] = reflect.ValueOf(oas)
@@ -198,15 +201,11 @@ func TestQuickUnitGetPathByIndex(t *testing.T) {
 	}
 
 	gotRegRoutes := func(oas OAS) bool {
-		randIndex := uint(len(oas.Paths) - rand.Intn(len(oas.Paths)-2))
+		randIndex := uint(len(oas.Paths) - rand.Intn(len(oas.Paths)-2)) //nolint:gosec //ignored in tests.
 
 		got := oas.GetPathByIndex(int(randIndex))
 
-		if !reflect.DeepEqual(got, &oas.Paths[randIndex]) {
-			return false
-		}
-
-		return true
+		return reflect.DeepEqual(got, &oas.Paths[randIndex])
 	}
 
 	if err := quick.Check(gotRegRoutes, &config); err != nil {
@@ -214,17 +213,22 @@ func TestQuickUnitGetPathByIndex(t *testing.T) {
 	}
 }
 
-func RandomString(n int) string {
-	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+func RandomString(t *testing.T, n int) string {
+	t.Helper()
+
+	letters := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 
 	s := make([]rune, n)
 	for i := range s {
-		s[i] = letters[rand.Intn(len(letters))]
+		s[i] = letters[rand.Intn(len(letters))] //nolint:gosec //ignored in tests.
 	}
+
 	return string(s)
 }
 
 func TestQuickUnitAttachRoutes(t *testing.T) {
+	t.Parallel()
+
 	config := quick.Config{
 		Values: func(args []reflect.Value, rand *rand.Rand) {
 			rr := make(RegRoutes)
@@ -247,14 +251,10 @@ func TestQuickUnitAttachRoutes(t *testing.T) {
 		oas.AttachRoutes(routes)
 		got := oas.GetRegisteredRoutes()
 
-		if !reflect.DeepEqual(got, oas.RegisteredRoutes) {
-			return false
-		}
-
-		return true
+		return reflect.DeepEqual(got, oas.RegisteredRoutes)
 	}
+
 	if err := quick.Check(gotRegRoutes, &config); err != nil {
 		t.Errorf("Check failed: %#v", err)
 	}
-
 }
