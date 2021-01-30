@@ -58,7 +58,7 @@ func TestUnitGetRegisteredRoutes(t *testing.T) {
 			want: regRoutes,
 		},
 	}
-	for _, tt := range tests {
+	for _, tt := range tests { //nolint:paralleltest //ignore.
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -107,7 +107,8 @@ func TestUnitGetPathByIndex(t *testing.T) {
 			want: &paths[0],
 		},
 	}
-	for _, tt := range tests {
+	for _, tt := range tests { //nolint:paralleltest //Range statement for test TestUnitGetPathByIndex
+		// does not reinitialise the variable tt -> TODO: Troubleshoot this further
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
