@@ -1,4 +1,3 @@
-# Clone of https://github.com/lawzava/go-pg-migrate/blob/main/.golangci.yml
 linters-settings:
   gocritic:
     enabled-tags:

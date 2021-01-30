@@ -10,9 +10,3 @@
 
 Check out current [Project board](https://github.com/go-oas/docs/projects) for more information about first alpha
 release.
-
-----
-
-### :tada: Credits
-
-1. Thanks to [@Law Zava](https://github.com/lawzava) for the inspiration to make an OpenSource contribution.
