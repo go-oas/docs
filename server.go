@@ -1,6 +1,7 @@
 package docs
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -14,7 +15,17 @@ const (
 	fwSlashSuffix    = "/"
 )
 
-func ServeSwaggerUI(route, port string) {
+type ConfigSwaggerUI struct {
+	Route, Port string
+}
+
+func ServeSwaggerUI(conf *ConfigSwaggerUI) error {
+	if conf == nil {
+		return errors.New("swagger config is required")
+	}
+
+	var route = conf.Route
+
 	if route == "" {
 		route = defaultRoute
 	}
@@ -22,12 +33,14 @@ func ServeSwaggerUI(route, port string) {
 	fileServer := http.FileServer(FileSystem{http.Dir(defaultDirectory)})
 	http.Handle(route, http.StripPrefix(strings.TrimRight(route, fwSlashSuffix), fileServer))
 
-	log.Printf("Serving SwaggerIU on HTTP port: %s\n", port)
+	log.Printf("Serving SwaggerIU on HTTP port: %s\n", conf.Port)
 
-	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), nil); err != nil {
+	if err := http.ListenAndServe(fmt.Sprintf(":%s", conf.Port), nil); err != nil {
 		// TODO: Add graceful shutdown/handling with err chan.
-		panic(err)
+		return err
 	}
+
+	return nil
 }
 
 type FileSystem struct {
