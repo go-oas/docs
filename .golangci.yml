@@ -69,7 +69,7 @@ linters:
     - whitespace
     - wsl
     - asciicheck
-    - godox
+#    - godox //TODO: Temporarily disabled - return before doing first release.
     - nolintlint
     - goerr113
     - exhaustive
@@ -78,7 +78,6 @@ linters:
     - goheader
     - noctx
     - sqlclosecheck
-    #    - nlreturn
     - errorlint
     - paralleltest
     - tparallel
