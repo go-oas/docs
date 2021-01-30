@@ -53,6 +53,8 @@ type (
 	pathSecurityMaps []pathSecurityMap
 )
 
+// Try transforming to temporary hybrid-OAS struct as Law suggested.
+
 // TODO: Validations and refactoring needed.
 func (o *OAS) transformToMap() map[string]interface{} {
 	oasPrep := make(map[string]interface{})

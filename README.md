@@ -11,3 +11,9 @@
 
 Check out current [Project board](https://github.com/go-oas/docs/projects) for more information about first alpha
 release.
+
+----
+
+Contact
+
+[Telegram Group - @go_oas](https://t.me/go_oas)
