@@ -13,11 +13,21 @@ const (
 	goFileExt = ".go"
 )
 
+type configAnnotation struct {
+	getWD getWorkingDirFn
+}
+
+type (
+	getWorkingDirFn func() (dir string, err error)
+	pathWalkerFn    func(path string, walker walkerFn) (files []string, err error)
+	walkerFn        func(root string, walkFn filepath.WalkFunc) error
+)
+
 // MapAnnotationsInPath scanIn is relevant from initiator calling it.
 //
 // It accepts the path in which to scan for annotations within Go files.
-func (o *OAS) MapAnnotationsInPath(scanIn string) error {
-	filesInPath, err := scanForChangesInPath(scanIn)
+func (o *OAS) MapAnnotationsInPath(scanIn string, conf ...configAnnotation) error {
+	filesInPath, err := scanForChangesInPath(scanIn, getWDFn(conf), walkFilepath)
 	if err != nil {
 		return fmt.Errorf(" :%w", err)
 	}
@@ -34,13 +44,13 @@ func (o *OAS) MapAnnotationsInPath(scanIn string) error {
 
 // scanForChangesInPath scans for annotations changes on handlers in passed path,
 // which is relative to the caller's point of view.
-func scanForChangesInPath(handlersPath string) (files []string, err error) {
-	currentPath, err := os.Getwd()
+func scanForChangesInPath(handlersPath string, getWD getWorkingDirFn, walker pathWalkerFn) (files []string, err error) {
+	currentPath, err := getWD()
 	if err != nil {
 		return files, fmt.Errorf("failed getting current working directory: %w", err)
 	}
 
-	files, err = walkFilepath(filepath.Join(currentPath, handlersPath))
+	files, err = walker(filepath.Join(currentPath, handlersPath), filepath.Walk)
 	if err != nil {
 		return files, fmt.Errorf("failed walking tree of the given path: %w", err)
 	}
@@ -48,10 +58,30 @@ func scanForChangesInPath(handlersPath string) (files []string, err error) {
 	return files, nil
 }
 
-func walkFilepath(pathToTraverse string) ([]string, error) {
+func (ca configAnnotation) getCurrentDirFetcher() getWorkingDirFn {
+	if ca.getWD != nil {
+		return ca.getWD
+	}
+
+	return os.Getwd
+}
+
+func getWDFn(configs []configAnnotation) getWorkingDirFn {
+	if len(configs) != 0 {
+		return configs[0].getCurrentDirFetcher()
+	}
+
+	return os.Getwd
+}
+
+func walkFilepath(pathToTraverse string, walker walkerFn) ([]string, error) {
 	var files []string
 
-	err := filepath.Walk(pathToTraverse, func(path string, info os.FileInfo, err error) error {
+	walkFn := func(path string, info os.FileInfo, err error) error {
+		if info == nil {
+			return nil
+		}
+
 		if info.IsDir() {
 			return nil
 		}
@@ -61,10 +91,13 @@ func walkFilepath(pathToTraverse string) ([]string, error) {
 		}
 
 		files = append(files, path)
+
 		return nil
-	})
+	}
+
+	err := walker(pathToTraverse, walkFn)
 	if err != nil {
-		return files, err //nolint:wrapcheck //it will be wrapped by consumer.
+		return files, err
 	}
 
 	return files, nil
