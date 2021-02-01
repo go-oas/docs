@@ -9,7 +9,7 @@
 
 ### :construction: WIP :construction:
 
-Check out current [Project board](https://github.com/go-oas/docs/projects) for more information about first alpha
+Check out current [Project board](https://github.com/go-oas/docs/projects/1) for more information about first alpha
 release.
 
 ----

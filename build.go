@@ -9,66 +9,142 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const docsOutPath = "./internal/dist/openapi.yaml"
+const defaultDocsOutPath = "./internal/dist/openapi.yaml"
 
-// FIXME: Split into 3 fn units.
-func (o *OAS) BuildDocs(customOutPath string) error {
+// ConfigBuilder represents a config structure which will be used for the YAML Builder (BuildDocs fn).
+//
+// This structure was introduced to enable possible extensions to the OAS.BuildDocs() without introducing breaking API changes.
+type ConfigBuilder struct {
+	customPath string
+}
+
+func (cb ConfigBuilder) getPath() string {
+	return cb.customPath
+}
+
+func getPathFromFirstElement(cbs []ConfigBuilder) string {
+	if len(cbs) == 0 {
+		return defaultDocsOutPath
+	}
+
+	return cbs[0].getPath()
+}
+
+// BuildDocs marshals the OAS struct to YAML and saves it to the chosen output file.
+//
+// Returns an error if there is any.
+func (o *OAS) BuildDocs(conf ...ConfigBuilder) error {
 	err := o.initCallStackForRoutes()
 	if err != nil {
 		return fmt.Errorf("failed initiating call stack for registered routes: %w", err)
 	}
 
-	transformedOAS := o.transformToMap()
-
-	yml, err := yaml.Marshal(transformedOAS)
+	yml, err := marshalToYAML(o)
 	if err != nil {
-		return fmt.Errorf("failed marshaling to yaml: %w", err)
+		return fmt.Errorf("marshaling issue occurred: %w", err)
 	}
 
-	outYAML, err := os.Create(docsOutPath)
+	err = createYAMLOutFile(getPathFromFirstElement(conf), yml)
 	if err != nil {
-		return fmt.Errorf("failed creating yaml output file: %w", err)
-	}
-	defer outYAML.Close()
-
-	writer := bufio.NewWriter(outYAML)
-
-	_, err = writer.Write(yml)
-	if err != nil {
-		return fmt.Errorf("failed writing to yaml output file: %w", err)
-	}
-
-	err = writer.Flush()
-	if err != nil {
-		return fmt.Errorf("failed flishing output writer: %w", err)
+		return fmt.Errorf("an issue occurred while saving to YAML output: %w", err)
 	}
 
 	return nil
 }
 
+func marshalToYAML(oas *OAS) ([]byte, error) {
+	transformedOAS := oas.transformToHybridOAS()
+
+	yml, err := yaml.Marshal(transformedOAS)
+	if err != nil {
+		return yml, fmt.Errorf("failed marshaling to yaml: %w", err)
+	}
+
+	return yml, err
+}
+
+func createYAMLOutFile(outPath string, marshaledYAML []byte) error {
+	outYAML, err := os.Create(outPath)
+	if err != nil {
+		return fmt.Errorf("failed creating yaml output file: %w", err)
+	}
+	defer outYAML.Close()
+
+	err = writeAndFlush(marshaledYAML, outYAML)
+	if err != nil {
+		return fmt.Errorf("writing issue occurred: %w", err)
+	}
+
+	return nil
+}
+
+func writeAndFlush(yml []byte, outYAML *os.File) error {
+	writer := bufio.NewWriter(outYAML)
+
+	_, err := writer.Write(yml)
+	if err != nil {
+		return fmt.Errorf("failed writing to YAML output file: %w", err)
+	}
+
+	err = writer.Flush()
+	if err != nil {
+		return fmt.Errorf("failed flushing output writer: %w", err)
+	}
+
+	return nil
+}
+
+const (
+	keyTags            = "tags"
+	keySummary         = "summary"
+	keyOperationID     = "operationId"
+	keySecurity        = "security"
+	keyRequestBody     = "requestBody"
+	keyResponses       = "responses"
+	keyDescription     = "description"
+	keyContent         = "content"
+	keyRef             = "$ref"
+	keySchemas         = "schemas"
+	keySecuritySchemes = "securitySchemes"
+	keyName            = "name"
+	keyType            = "type"
+	keyProperties      = "properties"
+	keyIn              = "in"
+	keyXML             = "xml"
+)
+
+// TODO: Should I add hash linked list maps support?
 type (
 	pathsMap         map[string]methodsMap
+	componentsMap    map[string]interface{}
 	methodsMap       map[string]interface{}
 	pathSecurityMap  map[string][]string
 	pathSecurityMaps []pathSecurityMap
 )
 
-// Try transforming to temporary hybrid-OAS struct as Law suggested.
+type hybridOAS struct {
+	OpenAPI      OASVersion    `yaml:"openapi"`
+	Info         Info          `yaml:"info"`
+	ExternalDocs ExternalDocs  `yaml:"externalDocs"`
+	Servers      Servers       `yaml:"servers"`
+	Tags         Tags          `yaml:"tags"`
+	Paths        pathsMap      `yaml:"paths"`
+	Components   componentsMap `yaml:"components"`
+}
 
-// TODO: Validations and refactoring needed.
-func (o *OAS) transformToMap() map[string]interface{} {
-	oasPrep := make(map[string]interface{})
+func (o *OAS) transformToHybridOAS() hybridOAS {
+	ho := hybridOAS{}
 
-	oasPrep["openapi"] = o.OASVersion
-	oasPrep["info"] = o.Info
-	oasPrep["externalDocs"] = o.ExternalDocs
-	oasPrep["servers"] = o.Servers
-	oasPrep["tags"] = o.Tags
+	ho.OpenAPI = o.OASVersion
+	ho.Info = o.Info
+	ho.ExternalDocs = o.ExternalDocs
+	ho.Servers = o.Servers
+	ho.Tags = o.Tags
 
-	oasPrep["paths"] = makeAllPathsMap(&o.Paths)
-	oasPrep["components"] = makeComponentsMap(&o.Components)
+	ho.Paths = makeAllPathsMap(&o.Paths)
+	ho.Components = makeComponentsMap(&o.Components)
 
-	return oasPrep
+	return ho
 }
 
 func makeAllPathsMap(paths *Paths) pathsMap {
@@ -79,12 +155,12 @@ func makeAllPathsMap(paths *Paths) pathsMap {
 		}
 
 		pathMap := make(map[string]interface{})
-		pathMap["tags"] = path.Tags
-		pathMap["summary"] = path.Summary
-		pathMap["operationId"] = path.OperationID
-		pathMap["security"] = makeSecurityMap(&path.Security)
-		pathMap["requestBody"] = makeRequestBodyMap(&path.RequestBody)
-		pathMap["responses"] = makeResponsesMap(&path.Responses)
+		pathMap[keyTags] = path.Tags
+		pathMap[keySummary] = path.Summary
+		pathMap[keyOperationID] = path.OperationID
+		pathMap[keySecurity] = makeSecurityMap(&path.Security)
+		pathMap[keyRequestBody] = makeRequestBodyMap(&path.RequestBody)
+		pathMap[keyResponses] = makeResponsesMap(&path.Responses)
 
 		allPaths[path.Route][strings.ToLower(path.HTTPMethod)] = pathMap
 	}
@@ -95,8 +171,8 @@ func makeAllPathsMap(paths *Paths) pathsMap {
 func makeRequestBodyMap(reqBody *RequestBody) map[string]interface{} {
 	reqBodyMap := make(map[string]interface{})
 
-	reqBodyMap["description"] = reqBody.Description
-	reqBodyMap["content"] = makeContentSchemaMap(reqBody.Content)
+	reqBodyMap[keyDescription] = reqBody.Description
+	reqBodyMap[keyContent] = makeContentSchemaMap(reqBody.Content)
 
 	return reqBodyMap
 }
@@ -106,8 +182,8 @@ func makeResponsesMap(responses *Responses) map[uint]interface{} {
 
 	for _, resp := range *responses {
 		codeBodyMap := make(map[string]interface{})
-		codeBodyMap["description"] = resp.Description
-		codeBodyMap["content"] = makeContentSchemaMap(resp.Content)
+		codeBodyMap[keyDescription] = resp.Description
+		codeBodyMap[keyContent] = makeContentSchemaMap(resp.Content)
 
 		responsesMap[resp.Code] = codeBodyMap
 	}
@@ -133,7 +209,7 @@ func makeContentSchemaMap(content ContentTypes) map[string]interface{} {
 
 	for _, ct := range content {
 		refMap := make(map[string]string)
-		refMap["$ref"] = ct.Schema
+		refMap[keyRef] = ct.Schema
 
 		schemaMap := make(map[string]map[string]string)
 		schemaMap["schema"] = refMap
@@ -144,15 +220,15 @@ func makeContentSchemaMap(content ContentTypes) map[string]interface{} {
 	return contentSchemaMap
 }
 
-func makeComponentsMap(components *Components) map[string]interface{} {
-	componentsMap := make(map[string]interface{}, len(*components))
+func makeComponentsMap(components *Components) componentsMap {
+	cm := make(componentsMap, len(*components))
 
-	for _, cm := range *components {
-		componentsMap["schemas"] = makeComponentSchemasMap(&cm.Schemas)
-		componentsMap["securitySchemes"] = makeComponentSecuritySchemesMap(&cm.SecuritySchemes)
+	for _, component := range *components {
+		cm[keySchemas] = makeComponentSchemasMap(&component.Schemas)
+		cm[keySecuritySchemes] = makeComponentSecuritySchemesMap(&component.SecuritySchemes)
 	}
 
-	return componentsMap
+	return cm
 }
 
 func makeComponentSchemasMap(schemas *Schemas) map[string]interface{} {
@@ -160,12 +236,12 @@ func makeComponentSchemasMap(schemas *Schemas) map[string]interface{} {
 
 	for _, s := range *schemas {
 		scheme := make(map[string]interface{})
-		scheme["type"] = s.Type
-		scheme["properties"] = s.Properties
-		scheme["$ref"] = s.Ref
+		scheme[keyType] = s.Type
+		scheme[keyProperties] = s.Properties
+		scheme[keyRef] = s.Ref
 
 		if s.XML.Name != "" {
-			scheme["xml"] = s.XML
+			scheme[keyXML] = s.XML
 		}
 
 		schemesMap[s.Name] = scheme
@@ -179,11 +255,11 @@ func makeComponentSecuritySchemesMap(secSchemes *SecuritySchemes) map[string]int
 
 	for _, ss := range *secSchemes {
 		scheme := make(map[string]interface{})
-		scheme["name"] = ss.Name
-		scheme["type"] = ss.Type
+		scheme[keyName] = ss.Name
+		scheme[keyType] = ss.Type
 
 		if ss.In != "" {
-			scheme["in"] = ss.In
+			scheme[keyIn] = ss.In
 		}
 
 		secSchemesMap[ss.Name] = scheme

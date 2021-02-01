@@ -1,23 +1,4 @@
-components:
-    schemas:
-        User:
-            $ref: ""
-            properties:
-                - type: integer
-                  format: int64
-                  description: UserID
-                - type: bool
-                  description: isActive
-                  default: true
-            type: object
-    securitySchemes:
-        users_auth:
-            in: header
-            name: users_auth
-            type: apiKey
-externalDocs:
-    description: External documentation
-    url: https://kaynetik.com
+openapi: 3.0.1
 info:
     title: Build OAS3.0.1
     description: Description - Builder Testing for OAS3.0.1
@@ -28,7 +9,23 @@ info:
         name: MIT
         url: https://github.com/go-oas/docs/blob/main/LICENSE
     version: 0.0.1
-openapi: 3.0.1
+externalDocs:
+    description: External documentation
+    url: https://kaynetik.com
+servers:
+    - url: https://petstore.swagger.io/v2
+    - url: http://petstore.swagger.io/v2
+tags:
+    - name: user
+      description: Operations about the User
+      externalDocs:
+        description: ""
+        url: ""
+    - name: pet
+      description: Pet Store example
+      externalDocs:
+        description: Find out more about our store
+        url: http://swagger.io
 paths:
     /users:
         get:
@@ -71,17 +68,20 @@ paths:
             summary: Create a new User
             tags:
                 - user
-servers:
-    - url: https://petstore.swagger.io/v2
-    - url: http://petstore.swagger.io/v2
-tags:
-    - name: user
-      description: Operations about the User
-      externalDocs:
-        description: ""
-        url: ""
-    - name: pet
-      description: Pet Store example
-      externalDocs:
-        description: Find out more about our store
-        url: http://swagger.io
+components:
+    schemas:
+        User:
+            $ref: ""
+            properties:
+                - type: integer
+                  format: int64
+                  description: UserID
+                - type: bool
+                  description: isActive
+                  default: true
+            type: object
+    securitySchemes:
+        users_auth:
+            in: header
+            name: users_auth
+            type: apiKey

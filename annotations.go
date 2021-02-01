@@ -79,7 +79,7 @@ func (o *OAS) mapDocAnnotations(path string) error {
 	if err != nil {
 		return fmt.Errorf("failed to open file in path %s :%w", path, err)
 	}
-	defer f.Close() // FIXME: Consume this error.
+	defer f.Close()
 
 	scanner := bufio.NewScanner(f)
 
@@ -100,15 +100,32 @@ func (o *OAS) mapDocAnnotations(path string) error {
 
 func mapIfLineContainsOASTag(lineText string, o *OAS) {
 	if strings.Contains(lineText, OASAnnotationInit) {
-		// TODO: Can this be more performance cautious?
-		fields := strings.Fields(lineText)
+		annotations := oasAnnotations(strings.Fields(lineText))
 
-		// TODO: Implement getters for these fields?
 		var newRoute Path
-		newRoute.HandlerFuncName = fields[2]
-		newRoute.Route = fields[3]
-		newRoute.HTTPMethod = fields[4]
+		newRoute.HandlerFuncName = annotations.getHandlerFuncName()
+		newRoute.Route = annotations.getRoute()
+		newRoute.HTTPMethod = annotations.getHTTPMethod()
 
 		o.Paths = append(o.Paths, newRoute)
 	}
 }
+
+// Begin of oasAnnotations section.
+// This section is used mostly to abstract upon the []string, so that future implementations are less susceptible to breaking changes.
+
+type oasAnnotations []string
+
+func (oa oasAnnotations) getHandlerFuncName() string {
+	return oa[2]
+}
+
+func (oa oasAnnotations) getRoute() string {
+	return oa[3]
+}
+
+func (oa oasAnnotations) getHTTPMethod() string {
+	return oa[4]
+}
+
+// End of oasAnnotations section.

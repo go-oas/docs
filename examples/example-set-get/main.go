@@ -83,7 +83,7 @@ func main() {
 		panic(err)
 	}
 
-	err = apiDoc.BuildDocs("")
+	err = apiDoc.BuildDocs()
 	if err != nil {
 		panic(err)
 	}

@@ -27,7 +27,8 @@ func main() {
 		docs.Tag{
 			Name:        "user",
 			Description: "Operations about the User",
-		}, docs.Tag{
+		},
+		docs.Tag{
 			Name:        "pet",
 			Description: "Pet Store example",
 			ExternalDocs: docs.ExternalDocs{
@@ -92,7 +93,7 @@ func main() {
 		panic(err)
 	}
 
-	err = apiDoc.BuildDocs("")
+	err = apiDoc.BuildDocs()
 	if err != nil {
 		panic(err)
 	}
