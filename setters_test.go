@@ -27,7 +27,7 @@ func TestUnitInfoSetLicense(t *testing.T) {
 func TestUnitInfoGetInfo(t *testing.T) {
 	t.Parallel()
 
-	var oasPrep = OAS{Info: Info{
+	oasPrep := OAS{Info: Info{
 		Title: testingPostfix,
 	}}
 
@@ -41,7 +41,7 @@ func TestUnitInfoGetInfo(t *testing.T) {
 func TestUnitSetOASVersion(t *testing.T) {
 	t.Parallel()
 
-	var oasPrep = OAS{Info: Info{
+	oasPrep := OAS{Info: Info{
 		Title: testingPostfix,
 	}}
 
