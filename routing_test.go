@@ -174,27 +174,30 @@ func TestQuickUnitGetRegisteredRoutes(t *testing.T) {
 	}
 }
 
+func getPaths(t *testing.T, count int, rndStr string) Paths {
+	t.Helper()
+
+	pt := make(Paths, 0, count+2)
+
+	for i := 0; i < count+1; i++ {
+		pt = append(pt, Path{
+			Route:           rndStr,
+			HTTPMethod:      http.MethodGet,
+			HandlerFuncName: rndStr,
+		})
+	}
+
+	return pt
+}
+
 func TestQuickUnitGetPathByIndex(t *testing.T) {
 	t.Parallel()
-
-	paths := func(count int, rndStr string) Paths {
-		pt := make(Paths, count+2)
-
-		for i := 0; i < count+1; i++ {
-			pt = append(pt, Path{
-				Route:      rndStr,
-				HTTPMethod: http.MethodGet,
-			})
-		}
-
-		return pt
-	}
 
 	config := quick.Config{
 		Values: func(args []reflect.Value, rand *rand.Rand) {
 			count := rand.Intn(550-1) + 1
 			oas := OAS{
-				Paths: paths(count, RandomString(t, count)),
+				Paths: getPaths(t, count, RandomString(t, count)),
 			}
 
 			args[0] = reflect.ValueOf(oas)
@@ -202,7 +205,14 @@ func TestQuickUnitGetPathByIndex(t *testing.T) {
 	}
 
 	gotRegRoutes := func(oas OAS) bool {
-		randIndex := uint(len(oas.Paths) - rand.Intn(len(oas.Paths)-2)) //nolint:gosec //ignored in tests.
+		pathsLen := len(oas.Paths)
+		rng := 2
+		if pathsLen > 3 {
+			rng = int(uint(len(oas.Paths) - 2))
+		}
+		upRnd := int(uint(rand.Intn(rng)))
+
+		randIndex := uint(pathsLen - upRnd) //nolint:gosec //ignored in tests.
 
 		got := oas.GetPathByIndex(int(randIndex - 1))
 
