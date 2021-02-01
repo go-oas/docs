@@ -112,7 +112,8 @@ func mapIfLineContainsOASTag(lineText string, o *OAS) {
 }
 
 // Begin of oasAnnotations section.
-// This section is used mostly to abstract upon the []string, so that future implementations are less susceptible to breaking changes.
+// This section is used mostly to abstract upon the []string,
+// so that future implementations are less susceptible to breaking changes.
 
 type oasAnnotations []string
 

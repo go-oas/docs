@@ -7,6 +7,8 @@ const (
 )
 
 func TestUnitMapAnnotationsInPath(t *testing.T) {
+	t.Parallel()
+
 	o := prepForInitCallStack(t, false)
 
 	// TODO: Finish this test.

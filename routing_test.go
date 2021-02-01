@@ -206,13 +206,15 @@ func TestQuickUnitGetPathByIndex(t *testing.T) {
 
 	gotRegRoutes := func(oas OAS) bool {
 		pathsLen := len(oas.Paths)
-		rng := 2
-		if pathsLen > 3 {
-			rng = int(uint(len(oas.Paths) - 2))
-		}
-		upRnd := int(uint(rand.Intn(rng)))
+		r := 2
 
-		randIndex := uint(pathsLen - upRnd) //nolint:gosec //ignored in tests.
+		if pathsLen > 3 {
+			r = int(uint(len(oas.Paths) - 2))
+		}
+
+		upRnd := int(uint(rand.Intn(r))) //nolint:gosec //week rnd generator - ignore in test.
+
+		randIndex := uint(pathsLen - upRnd)
 
 		got := oas.GetPathByIndex(int(randIndex - 1))
 

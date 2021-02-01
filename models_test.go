@@ -6,6 +6,8 @@ import (
 )
 
 func TestUnitNew(t *testing.T) {
+	t.Parallel()
+
 	got := New()
 
 	want := OAS{

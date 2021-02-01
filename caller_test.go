@@ -76,13 +76,7 @@ func TestQuickUnitCaller(t *testing.T) {
 				RegisteredRoutes: rr,
 			}
 
-			var routes []interface{}
-			for _, r := range rr {
-				routes = append(routes, r)
-			}
-
 			args[0] = reflect.ValueOf(oas)
-			// args[1] = reflect.ValueOf(routes)
 		},
 	}
 
@@ -168,4 +162,4 @@ func prepForInitCallStack(t *testing.T, triggerErr bool) OAS {
 }
 
 func getSuccessParamNumber(_ int, _ *OAS)               {}
-func getFailureParamNumber(_ *testing.T, _ int, _ *OAS) {}
+func getFailureParamNumber(t *testing.T, _ int, _ *OAS) { t.Helper() }

@@ -3,6 +3,7 @@ package docs
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
@@ -13,7 +14,8 @@ const defaultDocsOutPath = "./internal/dist/openapi.yaml"
 
 // ConfigBuilder represents a config structure which will be used for the YAML Builder (BuildDocs fn).
 //
-// This structure was introduced to enable possible extensions to the OAS.BuildDocs() without introducing breaking API changes.
+// This structure was introduced to enable possible extensions to the OAS.BuildDocs()
+// without introducing breaking API changes.
 type ConfigBuilder struct {
 	customPath string
 }
@@ -60,7 +62,7 @@ func marshalToYAML(oas *OAS) ([]byte, error) {
 		return yml, fmt.Errorf("failed marshaling to yaml: %w", err)
 	}
 
-	return yml, err
+	return yml, nil
 }
 
 func createYAMLOutFile(outPath string, marshaledYAML []byte) error {
@@ -78,7 +80,7 @@ func createYAMLOutFile(outPath string, marshaledYAML []byte) error {
 	return nil
 }
 
-func writeAndFlush(yml []byte, outYAML *os.File) error {
+func writeAndFlush(yml []byte, outYAML io.Writer) error {
 	writer := bufio.NewWriter(outYAML)
 
 	_, err := writer.Write(yml)
