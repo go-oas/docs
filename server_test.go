@@ -2,7 +2,6 @@ package docs
 
 import (
 	"errors"
-	"io/fs"
 	"math/rand"
 	"net/http"
 	"os"
@@ -243,7 +242,7 @@ func errGetStatFn(t *testing.T) getStatFn {
 	t.Helper()
 
 	return func(file http.File) fileStatFn {
-		return func() (fs.FileInfo, error) {
+		return func() (os.FileInfo, error) {
 			fi, _ := file.Stat()
 
 			return fi, errors.New("triggerErr")
@@ -252,7 +251,7 @@ func errGetStatFn(t *testing.T) getStatFn {
 }
 
 func statTrueGetIsDirFn() getIsDirFn {
-	return func(file fs.FileInfo) fsIsDirFn {
+	return func(file os.FileInfo) fsIsDirFn {
 		return func() bool {
 			return true
 		}

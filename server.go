@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/fs"
 	"log"
 	"net/http"
 	"os"
@@ -118,14 +117,14 @@ func newFSOpen(fis http.FileSystem) fsOpenFn {
 
 func newGetStatFn() getStatFn {
 	return func(file http.File) fileStatFn {
-		return func() (fs.FileInfo, error) {
+		return func() (os.FileInfo, error) {
 			return file.Stat()
 		}
 	}
 }
 
 func newGetIsDirFn() getIsDirFn {
-	return func(file fs.FileInfo) fsIsDirFn {
+	return func(file os.FileInfo) fsIsDirFn {
 		return func() bool {
 			return file.IsDir()
 		}
@@ -172,7 +171,7 @@ func (fis FileSystem) Open(path string) (http.File, error) {
 type (
 	fsOpenFn   func(name string) (http.File, error)
 	fsIsDirFn  func() bool
-	fileStatFn func() (fs.FileInfo, error)
+	fileStatFn func() (os.FileInfo, error)
 	getStatFn  func(file http.File) fileStatFn
-	getIsDirFn func(file fs.FileInfo) fsIsDirFn
+	getIsDirFn func(file os.FileInfo) fsIsDirFn
 )
