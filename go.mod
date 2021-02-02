@@ -1,6 +1,6 @@
 module github.com/go-oas/docs
 
-go 1.15
+go 1.16
 
 require (
 	github.com/kr/pretty v0.1.0 // indirect

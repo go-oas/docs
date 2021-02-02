@@ -1,5 +1,5 @@
 name: golangci
-on: [push]
+on: [ push ]
 env:
   GO111MODULE: on
 jobs:
