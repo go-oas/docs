@@ -14,10 +14,11 @@ import (
 )
 
 const (
-	defaultRoute     = "/api"
-	defaultDirectory = "./internal/dist"
-	defaultIndexPath = "/index.html"
-	fwSlashSuffix    = "/"
+	defaultRoute              = "/api"
+	defaultDirectory          = "./internal/dist"
+	defaultIndexPath          = "/index.html"
+	fwSlashSuffix             = "/"
+	sigContSleeperMiliseconds = 20
 )
 
 type ConfigSwaggerUI struct {
@@ -50,20 +51,19 @@ func ServeSwaggerUI(conf *ConfigSwaggerUI) error {
 	log.Printf("Serving SwaggerIU on HTTP port: %s\n", conf.Port)
 	conf.sigCont()
 
-	select {
-	case val := <-conf.stopper:
-		if shouldStop(val) {
-			err := conf.httpServer.Shutdown(context.Background())
-			if err != nil {
-				return fmt.Errorf("an error occurred while shutting down SwaggerUI: %w", err)
-			}
-		} else {
-			err := conf.httpServer.ListenAndServe()
-			if err != nil {
-				return fmt.Errorf("an error occurred while serving SwaggerUI: %w", err)
-			}
-		}
+	val := <-conf.stopper
 
+	switch val {
+	case syscall.SIGINT, syscall.SIGKILL:
+		err := conf.httpServer.Shutdown(context.Background())
+		if err != nil {
+			return fmt.Errorf("an error occurred while shutting down SwaggerUI: %w", err)
+		}
+	default:
+		err := conf.httpServer.ListenAndServe()
+		if err != nil {
+			return fmt.Errorf("an error occurred while serving SwaggerUI: %w", err)
+		}
 	}
 
 	return nil
@@ -100,22 +100,14 @@ func (c *ConfigSwaggerUI) initializeDefaultHTTPServer() {
 
 func (c *ConfigSwaggerUI) sigCont() {
 	if c.stopper == nil {
-		var osSignal = make(chan os.Signal)
+		osSignal := make(chan os.Signal)
 		c.stopper = osSignal
 
 		go func() {
-			time.Sleep(20 * time.Millisecond)
+			time.Sleep(sigContSleeperMiliseconds * time.Millisecond)
 			osSignal <- syscall.SIGCONT
 		}()
 	}
-}
-
-func shouldStop(val os.Signal) bool {
-	if val == syscall.SIGINT || val == syscall.SIGKILL {
-		return true
-	}
-
-	return false
 }
 
 func newFSOpen(fis http.FileSystem) fsOpenFn {

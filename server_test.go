@@ -260,6 +260,8 @@ func statTrueGetIsDirFn() getIsDirFn {
 }
 
 func TestUnitSwaggerUI(t *testing.T) {
+	t.Parallel()
+
 	conf := (*ConfigSwaggerUI)(nil)
 
 	err := ServeSwaggerUI(conf)
@@ -267,7 +269,7 @@ func TestUnitSwaggerUI(t *testing.T) {
 		t.Error("expected an error, got none")
 	}
 
-	var osSignal = make(chan os.Signal)
+	osSignal := make(chan os.Signal)
 
 	emptyRoute := &ConfigSwaggerUI{
 		Route:   "",
@@ -278,6 +280,7 @@ func TestUnitSwaggerUI(t *testing.T) {
 		time.Sleep(20 * time.Millisecond)
 		osSignal <- syscall.SIGINT
 	}()
+
 	_ = ServeSwaggerUI(emptyRoute)
 
 	if emptyRoute.Route != defaultRoute {
