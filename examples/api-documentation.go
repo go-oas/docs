@@ -11,7 +11,7 @@ func handleCreateUserRoute(oasPathIndex int, oas *docs.OAS) {
 	path.RequestBody = docs.RequestBody{
 		Description: "Create a new User",
 		Content: docs.ContentTypes{
-			getContentApplicationJSON("#/components/schemas/Pet"),
+			getContentApplicationJSON("#/components/schemas/User"),
 		},
 		Required: true,
 	}
@@ -23,12 +23,8 @@ func handleCreateUserRoute(oasPathIndex int, oas *docs.OAS) {
 
 	path.Security = docs.SecurityEntities{
 		docs.Security{
-			AuthName:  "users_auth",
+			AuthName:  "petstore_auth",
 			PermTypes: []string{"write:users", "read:users"},
-		},
-		docs.Security{
-			AuthName:  "deauth_users",
-			PermTypes: []string{"execute:users"},
 		},
 	}
 

@@ -21,7 +21,7 @@ func getResponseNotFound() docs.Response {
 		Code:        404,
 		Description: "Not Found",
 		Content: docs.ContentTypes{
-			getContentApplicationJSON("#/components/schemas/Pet"),
+			getContentApplicationJSON("#/components/schemas/User"),
 		},
 	}
 }
