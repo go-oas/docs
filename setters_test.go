@@ -52,3 +52,23 @@ func TestUnitSetOASVersion(t *testing.T) {
 		t.Error("failed setting OAS.OASVersion")
 	}
 }
+
+func TestUnitSetTag(t *testing.T) {
+	t.Parallel()
+
+	tags := Tags{}
+	tName := "pettag"
+	tDesc := "Everything about your Pets"
+	tED := ExternalDocs{
+		Description: "Find out more about our store (Swagger UI Example)",
+		URL:         "http://swagger.io",
+	}
+	tags.SetTag(tName, tDesc, tED)
+
+	firstTag := tags[0]
+	if firstTag.Name != tName ||
+		firstTag.Description != tDesc ||
+		firstTag.ExternalDocs != tED {
+		t.Error("tag not set properly")
+	}
+}

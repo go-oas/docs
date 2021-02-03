@@ -17,7 +17,7 @@ func TestUnitQuickInitializeStandardFS(t *testing.T) {
 
 	initStandardFS := func() bool {
 		fsInit := http.Dir(defaultDirectory)
-		want := FileSystem{
+		want := fileSystem{
 			fileSysInit: fsInit,
 			fsOpenFn:    newFSOpen(fsInit),
 			getStatFn:   newGetStatFn(),
@@ -67,7 +67,7 @@ func TestUnitQuickInitializeStandardFSErr(t *testing.T) {
 
 	initStandardFS := func(fsOpenFn fsOpenFn, getStatFn getStatFn, getIsDirFn getIsDirFn) bool {
 		fsInit := http.Dir(defaultDirectory)
-		want := FileSystem{
+		want := fileSystem{
 			fileSysInit: fsInit,
 			fsOpenFn:    fsOpenFn,
 			getStatFn:   getStatFn,
@@ -123,12 +123,12 @@ func TestUnitNewFSOpen(t *testing.T) {
 func TestUnitIsFSNil(t *testing.T) {
 	t.Parallel()
 
-	nilFS := (*FileSystem)(nil)
+	nilFS := (*fileSystem)(nil)
 	if !nilFS.isNil() {
 		t.Error()
 	}
 
-	fsInit := FileSystem{}
+	fsInit := fileSystem{}
 	if !fsInit.isNil() {
 		t.Error()
 	}
@@ -167,7 +167,7 @@ func TestUnitFSOpenOpenErr(t *testing.T) {
 
 	fsInit := http.Dir(defaultDirectory)
 
-	fsStd := &FileSystem{
+	fsStd := &fileSystem{
 		fileSysInit: fsInit,
 		fsOpenFn:    errFSOpen(t, fsInit),
 		getStatFn:   newGetStatFn(),
@@ -189,7 +189,7 @@ func TestUnitFSOpenGetStatErr(t *testing.T) {
 
 	fsInit := http.Dir(defaultDirectory)
 
-	fsStd := &FileSystem{
+	fsStd := &fileSystem{
 		fileSysInit: fsInit,
 		fsOpenFn:    newFSOpen(fsInit),
 		getStatFn:   errGetStatFn(t),
@@ -212,7 +212,7 @@ func TestUnitFSOpenDirInnerOpenErr(t *testing.T) {
 	fsInitCorrect := http.Dir(defaultDirectory)
 	fsErr := http.Dir("!!\\@!")
 
-	fsStd := &FileSystem{
+	fsStd := &fileSystem{
 		fileSysInit: fsErr,
 		fsOpenFn:    newFSOpen(fsInitCorrect),
 		getStatFn:   newGetStatFn(),
@@ -258,7 +258,7 @@ func statTrueGetIsDirFn() getIsDirFn {
 	}
 }
 
-func TestUnitSwaggerUI(t *testing.T) {
+func TestUnitSwaggerUIShutDown(t *testing.T) {
 	t.Parallel()
 
 	conf := (*ConfigSwaggerUI)(nil)
@@ -284,5 +284,19 @@ func TestUnitSwaggerUI(t *testing.T) {
 
 	if emptyRoute.Route != defaultRoute {
 		t.Errorf("route wasn't altered from its zero state to default route")
+	}
+}
+
+func TestUnitSigCont(t *testing.T) {
+	t.Parallel()
+
+	confSwg := &ConfigSwaggerUI{
+		stopper: nil,
+	}
+
+	confSwg.sigCont()
+
+	if confSwg.stopper == nil {
+		t.Error("stopper chan is nil, should be os.Signal")
 	}
 }

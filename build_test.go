@@ -7,12 +7,70 @@ func TestUnitBuild(t *testing.T) {
 
 	oasPrep := prepForInitCallStack(t, false)
 
-	info := &oasPrep.Info
+	setInfoForTest(t, &oasPrep.Info)
+	setPathForTest(t, &oasPrep.Paths[0])
+
+	components := Components{}
+	component := Component{
+		Schemas: Schemas{Schema{
+			Name: "schema_testing",
+			Properties: SchemaProperties{
+				SchemaProperty{
+					Name:        "EnumProp",
+					Type:        "enum",
+					Description: "short desc",
+					Enum:        []string{"enum", "test", "strSlc"},
+				},
+				SchemaProperty{
+					Name:        "intProp",
+					Type:        "integer",
+					Format:      "int64",
+					Description: "short desc",
+					Default:     1337,
+				},
+			},
+			XML: XMLEntry{Name: "XML entry test"},
+		}},
+		SecuritySchemes: SecuritySchemes{SecurityScheme{
+			Name: "ses_scheme_testing",
+			In:   "not empty",
+			Flows: SecurityFlows{SecurityFlow{
+				Type:    "implicit",
+				AuthURL: "http://petstore.swagger.io/oauth/dialog",
+				Scopes: SecurityScopes{
+					SecurityScope{
+						Name:        "write:pets",
+						Description: "Write to Pets",
+					},
+					SecurityScope{
+						Name:        "read:pets",
+						Description: "Read Pets",
+					},
+				},
+			}},
+		}},
+	}
+	components = append(components, component)
+	oasPrep.Components = components
+
+	err := oasPrep.BuildDocs(ConfigBuilder{CustomPath: "./testing_out.yaml"})
+	if err != nil {
+		t.Errorf("unexpected error for OAS builder: %v", err)
+	}
+}
+
+func setInfoForTest(t *testing.T, info *Info) {
+	t.Helper()
+
 	info.Title = "Info Testing"
 	info.Description = "Not Mandatory"
 	info.SetContact("aleksandar.nesovic@protonmail.com")
 	info.SetLicense("MIT", "https://en.wikipedia.org/wiki/MIT_License")
 	info.Version = "0.0.1"
+}
+
+func setPathForTest(t *testing.T, path *Path) {
+	t.Helper()
 
 	cts := ContentTypes{ContentType{
 		Name:   "testingType",
@@ -26,9 +84,6 @@ func TestUnitBuild(t *testing.T) {
 	responses := Responses{}
 	responses = append(responses, response)
 
-	// this should be a ptr - currently not effective...
-	path := oasPrep.Paths[0]
-
 	path.HTTPMethod = "GET"
 	path.Tags = []string{}
 	path.Summary = "TestingSummary"
@@ -40,30 +95,7 @@ func TestUnitBuild(t *testing.T) {
 	}
 	path.Responses = responses
 	path.Security = SecurityEntities{Security{AuthName: "sec"}}
-	path.HandlerFuncName = "testing"
-
-	components := Components{}
-	component := Component{
-		Schemas: Schemas{Schema{
-			Name: "schema_testing",
-			XML:  XMLEntry{Name: "XML entry test"},
-		}},
-		SecuritySchemes: SecuritySchemes{SecurityScheme{
-			Name: "ses_scheme_testing",
-			In:   "not empty",
-		}},
-	}
-	components = append(components, component)
-	oasPrep.Components = components
-
-	err := oasPrep.BuildDocs(ConfigBuilder{customPath: "./testing_out.yaml"})
-	if err != nil {
-		t.Errorf("unexpected error for OAS builder: %v", err)
-	}
 }
-
-// TODO: MAJORITY OF TESTING SHOULD HAPPEN HERE
-// BOTH WITH AND WITHOUT QUICK-CHECK
 
 func TestUnitGetPathFromFirstElem(t *testing.T) {
 	t.Parallel()
@@ -75,3 +107,5 @@ func TestUnitGetPathFromFirstElem(t *testing.T) {
 		t.Error("default docs path not set correctly")
 	}
 }
+
+// QUICK CHECK TESTS ARE COMING WITH NEXT RELEASE.
