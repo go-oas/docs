@@ -5,13 +5,14 @@
 <img align="right" width="180px" src="https://raw.githubusercontent.com/kaynetik/dotfiles/master/svg-resources/go-grpc-web.svg">
 
 ![GolangCI](https://github.com/go-oas/docs/workflows/golangci/badge.svg?branch=main)
-![Build](https://github.com/go-oas/docs/workflows/Golang/badge.svg?branch=main)
+![Build](https://github.com/go-oas/docs/workflows/Build/badge.svg?branch=main)
 [![Version](https://img.shields.io/badge/version-v0.0.1-green.svg)](https://github.com/go-oas/docs/releases)
 [![Go Report Card](https://goreportcard.com/badge/github.com/go-oas/docs)](https://goreportcard.com/report/github.com/go-oas/docs)
 [![Coverage Status](https://s3.amazonaws.com/assets.coveralls.io/badges/coveralls_93.svg)](https://coveralls.io/github/go-oas/docs?branch=main)
+[![codebeat badge](https://codebeat.co/badges/32b86556-84e3-4db9-9f11-923d12994f90)](https://codebeat.co/projects/github-com-go-oas-docs-main)
 [![Go Reference](https://pkg.go.dev/badge/github.com/go-oas/docs.svg)](https://pkg.go.dev/github.com/go-oas/docs)
 
-go-OAS Docs converts structured OAS3 (Swagger3) objects into OAS3/Swagger documentation & automatically serves it on
+go-OAS Docs converts structured OAS3 (Swagger3) objects into the Open API Specification & automatically serves it on
 chosen route and port. It's extremely flexible and simple, so basically it can be integrated into any framework or
 existing project.
 
