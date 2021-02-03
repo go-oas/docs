@@ -2,13 +2,13 @@ openapi: 3.0.1
 info:
     title: Build OAS3.0.1
     description: Description - Builder Testing for OAS3.0.1
-    termsOfService: ToS LoremIpsum
+    termsOfService: https://smartbear.com/terms-of-use/
     contact:
-        email: nesovic@protonmail.com
+        email: aleksandar.nesovic@protonmail.com
     license:
         name: MIT
         url: https://github.com/go-oas/docs/blob/main/LICENSE
-    version: 0.0.1
+    version: 1.0.1
 externalDocs:
     description: External documentation
     url: https://kaynetik.com
@@ -19,12 +19,17 @@ tags:
     - name: user
       description: Operations about the User
       externalDocs:
-        description: ""
-        url: ""
+        description: User from the Petstore example
+        url: http://swagger.io
     - name: pet
-      description: Pet Store example
+      description: Everything about your Pets
       externalDocs:
-        description: Find out more about our store
+        description: Find out more about our store (Swagger UI Example)
+        url: http://swagger.io
+    - name: petko
+      description: Everything about your Petko
+      externalDocs:
+        description: Find out more about our store (Swagger UI Example)
         url: http://swagger.io
 paths:
     /users:
@@ -47,7 +52,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/Pet'
+                            $ref: '#/components/schemas/User'
                 description: Create a new User
             responses:
                 200:
@@ -57,31 +62,74 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/Pet'
+                                $ref: '#/components/schemas/User'
                     description: Not Found
             security:
-                - users_auth:
+                - petstore_auth:
                     - write:users
                     - read:users
-                - deauth_users:
-                    - execute:users
             summary: Create a new User
             tags:
                 - user
 components:
     schemas:
+        ApiResponse:
+            $ref: ""
+            properties:
+                code:
+                    format: int32
+                    type: integer
+                message:
+                    type: string
+                type:
+                    type: string
+            type: object
+            xml:
+                name: ApiResponse
+        Tag:
+            $ref: ""
+            properties:
+                id:
+                    format: int64
+                    type: integer
+                name:
+                    type: string
+            type: object
+            xml:
+                name: Tag
         User:
             $ref: ""
             properties:
-                - type: integer
-                  format: int64
-                  description: UserID
-                - type: bool
-                  description: isActive
-                  default: true
+                email:
+                    type: string
+                id:
+                    description: UserID
+                    format: int64
+                    type: integer
+                phForEnums:
+                    enum:
+                        - placed
+                        - approved
+                    type: enum
+                userStatus:
+                    description: User Status
+                    format: int32
+                    type: integer
+                username:
+                    type: string
             type: object
+            xml:
+                name: User
     securitySchemes:
-        users_auth:
+        api_key:
             in: header
-            name: users_auth
+            name: api_key
             type: apiKey
+        petstore_auth:
+            flows:
+                implicit:
+                    authorizationUrl: http://petstore.swagger.io/oauth/dialog
+                    scopes:
+                        read:users: Read users
+                        write:users: Modify users
+            type: oauth2
