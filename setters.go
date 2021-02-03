@@ -22,3 +22,25 @@ func (i *Info) SetLicense(licType, url string) {
 		URL:  URL(url),
 	}
 }
+
+func (tt *Tags) SetTag(name, tagDescription string, extDocs ExternalDocs) {
+	var tag Tag
+
+	if !isStrEmpty(name) {
+		tag.Name = name
+	}
+
+	if !isStrEmpty(tagDescription) {
+		tag.Description = tagDescription
+	}
+
+	if !extDocs.isEmpty() {
+		tag.ExternalDocs = extDocs
+	}
+
+	tt.AppendTag(&tag)
+}
+
+func (tt *Tags) AppendTag(tag *Tag) {
+	*tt = append(*tt, *tag)
+}

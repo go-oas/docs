@@ -1,0 +1,26 @@
+package docs
+
+const (
+	keyTags             = "tags"
+	keySummary          = "summary"
+	keyOperationID      = "operationId"
+	keySecurity         = "security"
+	keyRequestBody      = "requestBody"
+	keyResponses        = "responses"
+	keyDescription      = "description"
+	keyContent          = "content"
+	keyRef              = "$ref"
+	keySchemas          = "schemas"
+	keySecuritySchemes  = "securitySchemes"
+	keyName             = "name"
+	keyType             = "type"
+	keyProperties       = "properties"
+	keyIn               = "in"
+	keyXML              = "xml"
+	keyFormat           = "format"
+	keyDefault          = "default"
+	keyEnum             = "enum"
+	keyFlows            = "flows"
+	keyAuthorizationURL = "authorizationUrl"
+	keyScopes           = "scopes"
+)

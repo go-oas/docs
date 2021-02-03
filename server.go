@@ -13,11 +13,11 @@ import (
 )
 
 const (
-	defaultRoute              = "/api"
-	defaultDirectory          = "./internal/dist"
-	defaultIndexPath          = "/index.html"
-	fwSlashSuffix             = "/"
-	sigContSleeperMiliseconds = 20
+	defaultRoute               = "/api"
+	defaultDirectory           = "./internal/dist"
+	defaultIndexPath           = "/index.html"
+	fwSlashSuffix              = "/"
+	sigContSleeperMilliseconds = 20
 )
 
 type ConfigSwaggerUI struct {
@@ -25,7 +25,7 @@ type ConfigSwaggerUI struct {
 	Port  string
 
 	httpServer *http.Server
-	initFS     FileSystem
+	initFS     fileSystem
 	stopper    chan os.Signal
 }
 
@@ -54,22 +54,16 @@ func ServeSwaggerUI(conf *ConfigSwaggerUI) error {
 
 	switch val {
 	case syscall.SIGINT, syscall.SIGKILL:
-		err := conf.httpServer.Shutdown(context.Background())
-		if err != nil {
-			return fmt.Errorf("an error occurred while shutting down SwaggerUI: %w", err)
-		}
+		log.Printf("SwaggerUI did not shut down properly: %v", conf.httpServer.Shutdown(context.Background()))
 	default:
-		err := conf.httpServer.ListenAndServe()
-		if err != nil {
-			return fmt.Errorf("an error occurred while serving SwaggerUI: %w", err)
-		}
+		log.Printf("SwaggerUI server experienced an unexpected error: %v", conf.httpServer.ListenAndServe())
 	}
 
 	return nil
 }
 
-// FileSystem represents a wrapper for http.FileSystem, with relevant type func implementations.
-type FileSystem struct {
+// fileSystem represents a wrapper for http.FileSystem, with relevant type func implementations.
+type fileSystem struct {
 	fileSysInit http.FileSystem
 
 	fsOpenFn  fsOpenFn
@@ -77,35 +71,22 @@ type FileSystem struct {
 	getIsDir  getIsDirFn
 }
 
-func initializeStandardFS() *FileSystem {
+type (
+	fsOpenFn   func(name string) (http.File, error)
+	fsIsDirFn  func() bool
+	fileStatFn func() (os.FileInfo, error)
+	getStatFn  func(file http.File) fileStatFn
+	getIsDirFn func(file os.FileInfo) fsIsDirFn
+)
+
+func initializeStandardFS() *fileSystem {
 	fsInit := http.Dir(defaultDirectory)
 
-	return &FileSystem{
+	return &fileSystem{
 		fileSysInit: fsInit,
 		fsOpenFn:    newFSOpen(fsInit),
 		getStatFn:   newGetStatFn(),
 		getIsDir:    newGetIsDirFn(),
-	}
-}
-
-func (c *ConfigSwaggerUI) initializeDefaultHTTPServer() {
-	fileServer := http.FileServer(c.initFS)
-
-	c.httpServer = &http.Server{
-		Addr:    fmt.Sprintf(":%s", c.Port),
-		Handler: http.StripPrefix(strings.TrimRight(c.Route, fwSlashSuffix), fileServer),
-	}
-}
-
-func (c *ConfigSwaggerUI) sigCont() {
-	if c.stopper == nil {
-		osSignal := make(chan os.Signal)
-		c.stopper = osSignal
-
-		go func() {
-			time.Sleep(sigContSleeperMiliseconds * time.Millisecond)
-			osSignal <- syscall.SIGCONT
-		}()
 	}
 }
 
@@ -131,7 +112,7 @@ func newGetIsDirFn() getIsDirFn {
 	}
 }
 
-func (fis *FileSystem) isNil() bool {
+func (fis *fileSystem) isNil() bool {
 	if fis == nil {
 		return true
 	}
@@ -147,7 +128,7 @@ func (fis *FileSystem) isNil() bool {
 }
 
 // Open opens file. Returns http.File, and error if there is any.
-func (fis FileSystem) Open(path string) (http.File, error) {
+func (fis fileSystem) Open(path string) (http.File, error) {
 	f, err := fis.fsOpenFn(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open file in path %s :%w", path, err)
@@ -168,10 +149,23 @@ func (fis FileSystem) Open(path string) (http.File, error) {
 	return f, nil
 }
 
-type (
-	fsOpenFn   func(name string) (http.File, error)
-	fsIsDirFn  func() bool
-	fileStatFn func() (os.FileInfo, error)
-	getStatFn  func(file http.File) fileStatFn
-	getIsDirFn func(file os.FileInfo) fsIsDirFn
-)
+func (c *ConfigSwaggerUI) initializeDefaultHTTPServer() {
+	fileServer := http.FileServer(c.initFS)
+
+	c.httpServer = &http.Server{
+		Addr:    fmt.Sprintf(":%s", c.Port),
+		Handler: http.StripPrefix(strings.TrimRight(c.Route, fwSlashSuffix), fileServer),
+	}
+}
+
+func (c *ConfigSwaggerUI) sigCont() {
+	if c.stopper == nil {
+		osSignal := make(chan os.Signal)
+		c.stopper = osSignal
+
+		go func() {
+			time.Sleep(sigContSleeperMilliseconds * time.Millisecond)
+			osSignal <- syscall.SIGCONT
+		}()
+	}
+}

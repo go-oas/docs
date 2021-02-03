@@ -34,7 +34,7 @@ type (
 type Info struct {
 	Title          string  `yaml:"title"`
 	Description    string  `yaml:"description"`
-	TermsOfService string  `yaml:"termsOfService"`
+	TermsOfService URL     `yaml:"termsOfService"`
 	Contact        Contact `yaml:"contact"`
 	License        License `yaml:"license"`
 	Version        Version `yaml:"version"`
@@ -134,6 +134,7 @@ type XMLEntry struct {
 type SchemaProperties []SchemaProperty
 
 type SchemaProperty struct {
+	Name        string      `yaml:"-"`
 	Type        string      // OAS3.0 data types - e.g. integer, boolean, string
 	Format      string      `yaml:"format,omitempty"`
 	Description string      `yaml:"description,omitempty"`
@@ -144,8 +145,35 @@ type SchemaProperty struct {
 type SecuritySchemes []SecurityScheme
 
 type SecurityScheme struct { // TODO: Lots of variants, yet to be researched.
-	Name  string
-	Type  string
-	In    string
-	Flows interface{}
+	Name  string        `yaml:"name,omitempty"`
+	Type  string        `yaml:"type,omitempty"`
+	In    string        `yaml:"in,omitempty"`
+	Flows SecurityFlows `yaml:"flows,omitempty"`
+}
+
+type SecurityFlows []SecurityFlow
+
+type SecurityFlow struct {
+	Type    string         `yaml:"type,omitempty"`
+	AuthURL URL            `yaml:"authorizationUrl,omitempty"`
+	Scopes  SecurityScopes `yaml:"scopes,omitempty"`
+}
+
+type SecurityScopes []SecurityScope
+
+type SecurityScope struct {
+	Name        string `yaml:"name,omitempty"`
+	Description string `yaml:"description,omitempty"`
+}
+
+func (ed *ExternalDocs) isEmpty() bool {
+	if ed == nil {
+		return true
+	}
+
+	if ed.Description == emptyStr && ed.URL == emptyStr {
+		return true
+	}
+
+	return false
 }

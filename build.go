@@ -17,11 +17,11 @@ const defaultDocsOutPath = "./internal/dist/openapi.yaml"
 // This structure was introduced to enable possible extensions to the OAS.BuildDocs()
 // without introducing breaking API changes.
 type ConfigBuilder struct {
-	customPath string
+	CustomPath string
 }
 
 func (cb ConfigBuilder) getPath() string {
-	return cb.customPath
+	return cb.CustomPath
 }
 
 func getPathFromFirstElement(cbs []ConfigBuilder) string {
@@ -95,25 +95,6 @@ func writeAndFlush(yml []byte, outYAML io.Writer) error {
 
 	return nil
 }
-
-const (
-	keyTags            = "tags"
-	keySummary         = "summary"
-	keyOperationID     = "operationId"
-	keySecurity        = "security"
-	keyRequestBody     = "requestBody"
-	keyResponses       = "responses"
-	keyDescription     = "description"
-	keyContent         = "content"
-	keyRef             = "$ref"
-	keySchemas         = "schemas"
-	keySecuritySchemes = "securitySchemes"
-	keyName            = "name"
-	keyType            = "type"
-	keyProperties      = "properties"
-	keyIn              = "in"
-	keyXML             = "xml"
-)
 
 // TODO: Should I add hash linked list maps support?
 type (
@@ -233,13 +214,45 @@ func makeComponentsMap(components *Components) componentsMap {
 	return cm
 }
 
+func makePropertiesMap(properties *SchemaProperties) map[string]interface{} {
+	propertiesMap := make(map[string]interface{}, len(*properties))
+
+	for _, prop := range *properties {
+		propMap := make(map[string]interface{})
+
+		if !isStrEmpty(prop.Type) {
+			propMap[keyType] = prop.Type
+		}
+
+		if !isStrEmpty(prop.Format) {
+			propMap[keyFormat] = prop.Format
+		}
+
+		if !isStrEmpty(prop.Description) {
+			propMap[keyDescription] = prop.Description
+		}
+
+		if len(prop.Enum) > 0 {
+			propMap[keyEnum] = prop.Enum
+		}
+
+		if prop.Default != nil {
+			propMap[keyDefault] = prop.Default
+		}
+
+		propertiesMap[prop.Name] = propMap
+	}
+
+	return propertiesMap
+}
+
 func makeComponentSchemasMap(schemas *Schemas) map[string]interface{} {
 	schemesMap := make(map[string]interface{}, len(*schemas))
 
 	for _, s := range *schemas {
 		scheme := make(map[string]interface{})
 		scheme[keyType] = s.Type
-		scheme[keyProperties] = s.Properties
+		scheme[keyProperties] = makePropertiesMap(&s.Properties)
 		scheme[keyRef] = s.Ref
 
 		if s.XML.Name != "" {
@@ -257,15 +270,62 @@ func makeComponentSecuritySchemesMap(secSchemes *SecuritySchemes) map[string]int
 
 	for _, ss := range *secSchemes {
 		scheme := make(map[string]interface{})
-		scheme[keyName] = ss.Name
-		scheme[keyType] = ss.Type
 
-		if ss.In != "" {
+		lenFlows := len(ss.Flows)
+
+		if !isStrEmpty(ss.Name) && lenFlows == 0 {
+			scheme[keyName] = ss.Name
+		}
+
+		if !isStrEmpty(ss.Type) {
+			scheme[keyType] = ss.Type
+		}
+
+		if !isStrEmpty(ss.In) {
 			scheme[keyIn] = ss.In
+		}
+
+		if lenFlows > 0 {
+			scheme[keyFlows] = makeFlowsMap(&ss.Flows)
 		}
 
 		secSchemesMap[ss.Name] = scheme
 	}
 
 	return secSchemesMap
+}
+
+func makeFlowsMap(flows *SecurityFlows) map[string]interface{} {
+	flowsMap := make(map[string]interface{}, len(*flows))
+
+	for _, flow := range *flows {
+		flowMap := make(map[string]interface{})
+
+		flowMap[keyAuthorizationURL] = flow.AuthURL
+		flowMap[keyScopes] = makeSecurityScopesMap(&flow.Scopes)
+
+		flowsMap[flow.Type] = flowMap
+	}
+
+	return flowsMap
+}
+
+func makeSecurityScopesMap(scopes *SecurityScopes) map[string]interface{} {
+	scopesMap := make(map[string]interface{}, len(*scopes))
+
+	for _, scope := range *scopes {
+		if isStrEmpty(scope.Name) {
+			continue
+		}
+
+		scopesMap[scope.Name] = scope.Description
+	}
+
+	return scopesMap
+}
+
+const emptyStr = ""
+
+func isStrEmpty(s string) bool {
+	return s == emptyStr
 }
