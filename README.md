@@ -82,7 +82,7 @@ E.g.:
 package main
 
 import (
-	docs "github.com/go-oas/docs"
+	"github.com/go-oas/docs"
 )
 
 func main() {
