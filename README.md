@@ -2,6 +2,8 @@
 
 ## _go-OAS/docs_
 
+<img align="right" width="180px" src="https://raw.githubusercontent.com/kaynetik/dotfiles/master/svg-resources/go-grpc-web.svg">
+
 ![GolangCI](https://github.com/go-oas/docs/workflows/golangci/badge.svg?branch=main)
 ![Build](https://github.com/go-oas/docs/workflows/Golang/badge.svg?branch=main)
 [![Version](https://img.shields.io/badge/version-v0.0.1-green.svg)](https://github.com/go-oas/docs/releases)
