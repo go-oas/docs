@@ -114,4 +114,6 @@ above.
 ## Roadmap & Project board
 
 Check out the current [Project board](https://github.com/go-oas/docs/projects/1) for more information about the first
-alpha release. Note: Board is still in its early phase.
+alpha release. _Note: Board & project are still in its early phase._
+
+You can join projects Telegram group at: [https://t.me/go_oas](https://t.me/go_oas)
