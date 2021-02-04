@@ -5,7 +5,7 @@ import "testing"
 func TestUnitBuild(t *testing.T) {
 	t.Parallel()
 
-	oasPrep := prepForInitCallStack(t, false)
+	oasPrep := prepForInitCallStack(t)
 
 	setInfoForTest(t, &oasPrep.Info)
 	setPathForTest(t, &oasPrep.Paths[0])

@@ -1,42 +1,27 @@
 package docs
 
 import (
-	"fmt"
 	"reflect"
 )
 
-func (o *OAS) Call(name string, params ...interface{}) (result []reflect.Value, err error) {
+// routePostfix will get exported by v1.3.
+const routePostfix = "Route"
+
+func (o *OAS) Call(name string, params ...interface{}) (result []reflect.Value) {
 	f := reflect.ValueOf(o.RegisteredRoutes[name])
-	paramNum := len(params)
-	fnParamNum := f.Type().NumIn()
 
-	if paramNum != fnParamNum {
-		return result, fmt.Errorf(
-			"param number differs -> expected %d, got %d",
-			paramNum, fnParamNum,
-		)
-	}
-
-	in := make([]reflect.Value, paramNum)
+	in := make([]reflect.Value, len(params))
 	for k, param := range params {
 		in[k] = reflect.ValueOf(param)
 	}
 
 	result = f.Call(in)
 
-	return result, nil
+	return result
 }
 
-// should this be flexible for change?
-const routePostfix = "Route"
-
-func (o *OAS) initCallStackForRoutes() error {
-	for oasPathIndex, oasPath := range o.Paths { //nolint:gocritic //fixme: troubleshoot if this will be an issue.
-		_, err := o.Call(oasPath.HandlerFuncName+routePostfix, oasPathIndex, o)
-		if err != nil {
-			return fmt.Errorf(" :%w", err)
-		}
+func (o *OAS) initCallStackForRoutes() {
+	for oasPathIndex := range o.Paths {
+		o.Call(o.Paths[oasPathIndex].HandlerFuncName+routePostfix, oasPathIndex, o)
 	}
-
-	return nil
 }

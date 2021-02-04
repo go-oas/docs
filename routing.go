@@ -11,7 +11,8 @@ type (
 	RouteFn func(index int, oas *OAS)
 
 	// RegRoutes represent a map of RouteFn's.
-	// TODO: Will this get Deprecated?
+	//
+	// Note: Considering to un-export it.
 	RegRoutes map[string]RouteFn
 )
 

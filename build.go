@@ -36,10 +36,7 @@ func getPathFromFirstElement(cbs []ConfigBuilder) string {
 //
 // Returns an error if there is any.
 func (o *OAS) BuildDocs(conf ...ConfigBuilder) error {
-	err := o.initCallStackForRoutes()
-	if err != nil {
-		return fmt.Errorf("failed initiating call stack for registered routes: %w", err)
-	}
+	o.initCallStackForRoutes()
 
 	yml, err := marshalToYAML(o)
 	if err != nil {

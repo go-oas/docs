@@ -9,58 +9,10 @@ import (
 
 const testingPostfix = "Testing"
 
-func TestQuickUnitCallerErr(t *testing.T) {
-	t.Parallel()
-
-	config := quick.Config{
-		Values: func(args []reflect.Value, rand *rand.Rand) {
-			rr := make(RegRoutes)
-			count := rand.Intn(550-1) + 1
-			paths := getPaths(t, count, RandomString(t, count))
-
-			for _, p := range paths {
-				rr[p.Route+testingPostfix] = getPaths
-			}
-
-			oas := OAS{
-				Paths:            getPaths(t, count, RandomString(t, count)),
-				RegisteredRoutes: rr,
-			}
-
-			var routes []interface{}
-			for _, r := range rr {
-				routes = append(routes, r)
-			}
-
-			args[0] = reflect.ValueOf(oas)
-			args[1] = reflect.ValueOf(routes)
-		},
-	}
-
-	callerWrongParamNumber := func(oas OAS, routes []interface{}) bool {
-		oas.AttachRoutes(routes)
-
-		for oasPathIndex := range oas.Paths {
-			_, err := oas.Call("getPaths", oasPathIndex, oas)
-			if err == nil {
-				t.Errorf("failing (OAS).Call() with err : %s", err)
-
-				return false
-			}
-		}
-
-		return true
-	}
-
-	if err := quick.Check(callerWrongParamNumber, &config); err != nil {
-		t.Errorf("Check failed: %#v", err)
-	}
-}
-
 func TestQuickUnitCaller(t *testing.T) {
 	t.Parallel()
 
-	successParamNumber := func(name string, oas *OAS) {}
+	successParamNumber := func(i int, oas *OAS) {}
 	config := quick.Config{
 		Values: func(args []reflect.Value, rand *rand.Rand) {
 			rr := make(RegRoutes)
@@ -81,10 +33,11 @@ func TestQuickUnitCaller(t *testing.T) {
 	}
 
 	callerCorrectParamNumber := func(oas OAS) bool {
-		for _, oasPath := range oas.Paths {
-			_, err := oas.Call(oasPath.Route+testingPostfix, oasPath.Route, &oas)
-			if err != nil {
-				t.Errorf("failed executing (OAS).Call() with err : %s", err)
+		for i, oasPath := range oas.Paths {
+			res := oas.Call(oasPath.Route+testingPostfix, i, &oas)
+
+			if len(res) > 0 {
+				t.Error("failed executing (OAS).Call() with")
 
 				return false
 			}
@@ -101,7 +54,7 @@ func TestQuickUnitCaller(t *testing.T) {
 func TestUnitCaller(t *testing.T) {
 	t.Parallel()
 
-	successParamNumber := func(name string, oas *OAS) {}
+	successParamNumber := func(i int, oas *OAS) {}
 	routeName := "testRouteTesting"
 	rr := make(RegRoutes)
 	rr[routeName] = successParamNumber
@@ -110,45 +63,24 @@ func TestUnitCaller(t *testing.T) {
 		RegisteredRoutes: rr,
 	}
 
-	_, err := o.Call(routeName, routeName, &o)
-	if err != nil {
-		t.Errorf("failed executing (OAS).Call() with err : %s", err)
-	}
+	_ = o.Call(routeName, 0, &o)
 }
 
 func TestUnitInitCallStack(t *testing.T) {
 	t.Parallel()
 
-	o := prepForInitCallStack(t, false)
+	o := prepForInitCallStack(t)
 
-	err := o.initCallStackForRoutes()
-	if err != nil {
-		t.Errorf("failed executing (OAS).initCallStackForRoutes() with err : %s", err)
-	}
+	o.initCallStackForRoutes()
 }
 
-func TestUnitInitCallStackErr(t *testing.T) {
-	t.Parallel()
-
-	o := prepForInitCallStack(t, true)
-
-	err := o.initCallStackForRoutes()
-	if err == nil {
-		t.Errorf("failed executing (OAS).initCallStackForRoutes() with err : %s", err)
-	}
-}
-
-func prepForInitCallStack(t *testing.T, triggerErr bool) OAS {
+func prepForInitCallStack(t *testing.T) OAS {
 	t.Helper()
 
 	routeName := "testRoute" + routePostfix
 	rr := make(RegRoutes)
 
-	if !triggerErr {
-		rr[routeName] = getSuccessParamNumber
-	} else {
-		rr[routeName] = getFailureParamNumber
-	}
+	rr[routeName] = getSuccessParamNumber
 
 	path := Path{
 		HandlerFuncName: "testRoute",
@@ -161,5 +93,6 @@ func prepForInitCallStack(t *testing.T, triggerErr bool) OAS {
 	return o
 }
 
-func getSuccessParamNumber(_ int, _ *OAS)               {}
-func getFailureParamNumber(t *testing.T, _ int, _ *OAS) { t.Helper() }
+func getSuccessParamNumber(_ int, _ *OAS) {}
+
+// func getFailureParamNumber(t *testing.T, _ int, _ *OAS) { t.Helper() }

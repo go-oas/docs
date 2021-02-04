@@ -16,20 +16,23 @@ func fetchRegRoutes(t *testing.T, count int) RegRoutes {
 	routes := make(RegRoutes)
 	randStr := RandomString(t, count)
 
+	ir := initRoutes(t, count)
+
 	for i := 0; i < count; i++ {
-		routes[randStr] = initRoutes(t, count)
+		routes[randStr] = ir[i]
 	}
 
 	return routes
 }
 
-func initRoutes(t *testing.T, count int) []interface{} {
+func initRoutes(t *testing.T, count int) []RouteFn {
 	t.Helper()
 
-	var routes []interface{}
+	var routes []RouteFn
 
 	for i := 0; i < count; i++ {
-		routes = append(routes, func() {})
+		tmpFn := func(i int, o *OAS) {}
+		routes = append(routes, tmpFn)
 	}
 
 	return routes
@@ -132,10 +135,7 @@ func TestUnitAttachRoutes(t *testing.T) {
 		RegisteredRoutes: rr,
 	}
 
-	routes := []interface{}{
-		fetchRegRoutes,
-		initRoutes,
-	}
+	routes := initRoutes(t, 5)
 
 	o.AttachRoutes(routes)
 
@@ -157,7 +157,7 @@ func TestQuickUnitGetRegisteredRoutes(t *testing.T) {
 	config := quick.Config{
 		Values: func(args []reflect.Value, rand *rand.Rand) {
 			oas := OAS{
-				RegisteredRoutes: map[string]interface{}{},
+				RegisteredRoutes: map[string]RouteFn{},
 			}
 			args[0] = reflect.ValueOf(oas)
 		},
@@ -250,17 +250,14 @@ func TestQuickUnitAttachRoutes(t *testing.T) {
 				RegisteredRoutes: rr,
 			}
 
-			routes := []interface{}{
-				fetchRegRoutes,
-				initRoutes,
-			}
+			routes := initRoutes(t, 5)
 
 			args[0] = reflect.ValueOf(oas)
 			args[1] = reflect.ValueOf(routes)
 		},
 	}
 
-	gotRegRoutes := func(oas OAS, routes []interface{}) bool {
+	gotRegRoutes := func(oas OAS, routes []RouteFn) bool {
 		oas.AttachRoutes(routes)
 		got := oas.GetRegisteredRoutes()
 
