@@ -6,9 +6,16 @@ import (
 	"strings"
 )
 
-type RegRoutes map[string]interface{}
+type (
+	// RouteFn represents a typeFunc which needs to be satisfied in order to use default routes attaching method.
+	RouteFn func(index int, oas *OAS)
 
-func (o *OAS) AttachRoutes(fns []interface{}) {
+	// RegRoutes represent a map of RouteFn's.
+	// TODO: Will this get Deprecated?
+	RegRoutes map[string]RouteFn
+)
+
+func (o *OAS) AttachRoutes(fns []RouteFn) {
 	for _, fn := range fns {
 		fnDeclaration := runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name()
 		fields := strings.SplitAfter(fnDeclaration, ".")

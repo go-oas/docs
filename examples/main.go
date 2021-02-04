@@ -13,7 +13,7 @@ func main() {
 	apiSetExternalDocs(&apiDoc)
 	apiSetComponents(&apiDoc)
 
-	apiDoc.AttachRoutes([]interface{}{
+	apiDoc.AttachRoutes([]docs.RouteFn{
 		handleCreateUserRoute,
 		handleGetUserRoute,
 	})
