@@ -105,7 +105,7 @@ func walkFilepath(pathToTraverse string, walker walkerFn) ([]string, error) {
 
 func (o *OAS) mapDocAnnotations(path string) error {
 	if o == nil {
-		return errors.New("pointer to OASHandlers can not be nil") // fixme: migrate to validator!
+		return errors.New("pointer to OASHandlers can not be nil")
 	}
 
 	f, err := os.Open(path)

@@ -86,7 +86,6 @@ type RequestBody struct {
 	Description string       `yaml:"description"`
 	Content     ContentTypes `yaml:"content"`
 	Required    bool         `yaml:"required"`
-	// TODO: Further develop/research.
 }
 
 type ContentTypes []ContentType
@@ -144,7 +143,7 @@ type SchemaProperty struct {
 
 type SecuritySchemes []SecurityScheme
 
-type SecurityScheme struct { // TODO: Lots of variants, yet to be researched.
+type SecurityScheme struct {
 	Name  string        `yaml:"name,omitempty"`
 	Type  string        `yaml:"type,omitempty"`
 	In    string        `yaml:"in,omitempty"`

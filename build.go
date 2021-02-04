@@ -96,7 +96,6 @@ func writeAndFlush(yml []byte, outYAML io.Writer) error {
 	return nil
 }
 
-// TODO: Should I add hash linked list maps support?
 type (
 	pathsMap         map[string]methodsMap
 	componentsMap    map[string]interface{}

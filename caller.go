@@ -5,8 +5,6 @@ import (
 	"reflect"
 )
 
-// FIXME: Complete file needs attention.
-
 func (o *OAS) Call(name string, params ...interface{}) (result []reflect.Value, err error) {
 	f := reflect.ValueOf(o.RegisteredRoutes[name])
 	paramNum := len(params)
