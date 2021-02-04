@@ -1,14 +1,14 @@
 package users
 
 type service struct {
-	repo Repository
+	repo exampleRepo
 }
 
-type Repository interface {
+type exampleRepo interface {
 	CreateUser() error
 }
 
-func newService(repo Repository) service {
+func newService(repo exampleRepo) service {
 	return service{
 		repo,
 	}

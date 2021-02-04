@@ -6,7 +6,7 @@
 
 ![GolangCI](https://github.com/go-oas/docs/workflows/golangci/badge.svg?branch=main)
 ![Build](https://github.com/go-oas/docs/workflows/Build/badge.svg?branch=main)
-[![Version](https://img.shields.io/badge/version-v1.0.4-success.svg)](https://github.com/go-oas/docs/releases)
+[![Version](https://img.shields.io/badge/version-v1.0.5-success.svg)](https://github.com/go-oas/docs/releases)
 [![Go Report Card](https://goreportcard.com/badge/github.com/go-oas/docs)](https://goreportcard.com/report/github.com/go-oas/docs)
 [![Coverage Status](https://coveralls.io/repos/github/go-oas/docs/badge.svg?branch=main)](https://coveralls.io/github/go-oas/docs?branch=main)
 [![codebeat badge](https://codebeat.co/badges/32b86556-84e3-4db9-9f11-923d12994f90)](https://codebeat.co/projects/github-com-go-oas-docs-main)
