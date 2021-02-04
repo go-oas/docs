@@ -1,5 +1,12 @@
 package docs
 
+// WARNING:
+// Most structures in here are an representation of what is defined in default
+//		Open API Specification documentation, v3.0.3.
+//
+// [More about it can be found on this link](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md)
+
+// New returns a new instance of OAS structure.
 func New() OAS {
 	initRoutes := RegRoutes{}
 
@@ -9,7 +16,7 @@ func New() OAS {
 }
 
 const (
-	OASAnnotationInit = "// @OAS "
+	oasAnnotationInit = "// @OAS "
 )
 
 // OAS - represents Open API Specification structure, in its approximated Go form.
@@ -24,13 +31,18 @@ type OAS struct {
 	RegisteredRoutes RegRoutes    `yaml:"-"`
 }
 
-// Version is represented in SemVer format.
 type (
-	Version    string
-	URL        string
+	// Version represents a SemVer version.
+	Version string
+
+	// URL represents and URL which is casted from string.
+	URL string
+
+	// OASVersion represents the OpenAPISpecification version which will be used.
 	OASVersion Version
 )
 
+// Info represents OAS info object.
 type Info struct {
 	Title          string  `yaml:"title"`
 	Description    string  `yaml:"description"`
@@ -40,36 +52,47 @@ type Info struct {
 	Version        Version `yaml:"version"`
 }
 
+// Contact represents OAS contact object, used by Info.
 type Contact struct {
 	Email string `yaml:"email"`
 }
 
+// License represents OAS license object, used by Info.
 type License struct {
 	Name string `yaml:"name"`
 	URL  URL    `yaml:"url"`
 }
 
+// ExternalDocs represents OAS externalDocs object.
+//
+// Aside from base OAS structure, this is also used by Tag object.
 type ExternalDocs struct {
 	Description string `yaml:"description"`
 	URL         URL    `yaml:"url"`
 }
 
+// Servers is a slice of Server objects.
 type Servers []Server
 
+// Server represents OAS server object.
 type Server struct {
 	URL URL `yaml:"url"`
 }
 
+// Tags is a slice of Tag objects.
 type Tags []Tag
 
+// Tag represents OAS tag object.
 type Tag struct {
 	Name         string       `yaml:"name"`
 	Description  string       `yaml:"description"`
 	ExternalDocs ExternalDocs `yaml:"externalDocs"`
 }
 
+// Paths is a slice of Path objects.
 type Paths []Path
 
+// Path represents OAS path object.
 type Path struct {
 	Route           string           `yaml:"route"`
 	HTTPMethod      string           `yaml:"httpMethod"`
@@ -82,43 +105,54 @@ type Path struct {
 	HandlerFuncName string           `yaml:"-"`
 }
 
+// RequestBody represents OAS requestBody object, used by Path.
 type RequestBody struct {
 	Description string       `yaml:"description"`
 	Content     ContentTypes `yaml:"content"`
 	Required    bool         `yaml:"required"`
 }
 
+// ContentTypes is a slice of ContentType objects.
 type ContentTypes []ContentType
 
+// ContentType represents OAS content type object, used by RequestBody and Response.
 type ContentType struct {
 	Name   string `yaml:"ct-name"`   // e.g. application/json
 	Schema string `yaml:"ct-schema"` // e.g. $ref: '#/components/schemas/Pet'
 }
 
+// Responses is a slice of Response objects.
 type Responses []Response
 
+// Response represents OAS response object, used by Path.
 type Response struct {
 	Code        uint         `yaml:"code"`
 	Description string       `yaml:"description"`
 	Content     ContentTypes `yaml:"content"`
 }
 
+// SecurityEntities is a slice of Security objects.
 type SecurityEntities []Security
 
+// Security represents OAS security object.
 type Security struct {
 	AuthName  string
 	PermTypes []string // write:pets , read:pets etc.
 }
 
+// Components is a slice of Component objects.
 type Components []Component
 
+// Component represents OAS component object.
 type Component struct {
 	Schemas         Schemas         `yaml:"schemas"`
 	SecuritySchemes SecuritySchemes `yaml:"securitySchemes"`
 }
 
+// Schemas is a slice of Schema objects.
 type Schemas []Schema
 
+// Schema represents OAS schema object, used by Component.
 type Schema struct {
 	Name       string
 	Type       string
@@ -127,11 +161,15 @@ type Schema struct {
 	Ref        string   // $ref: '#/components/schemas/Pet' // TODO: Should this be omitted if empty?
 }
 
+// XMLEntry represents name of XML entry in Schema object.
 type XMLEntry struct {
 	Name string
 }
+
+// SchemaProperties is a slice of SchemaProperty objects.
 type SchemaProperties []SchemaProperty
 
+// SchemaProperty represents OAS schema object, used by Schema.
 type SchemaProperty struct {
 	Name        string      `yaml:"-"`
 	Type        string      // OAS3.0 data types - e.g. integer, boolean, string
@@ -141,8 +179,10 @@ type SchemaProperty struct {
 	Default     interface{} `yaml:"default,omitempty"`
 }
 
+// SecuritySchemes is a slice of SecuritySchemes objects.
 type SecuritySchemes []SecurityScheme
 
+// SecurityScheme represents OAS security object, used by Component.
 type SecurityScheme struct {
 	Name  string        `yaml:"name,omitempty"`
 	Type  string        `yaml:"type,omitempty"`
@@ -150,21 +190,26 @@ type SecurityScheme struct {
 	Flows SecurityFlows `yaml:"flows,omitempty"`
 }
 
+// SecurityFlows is a slice of SecurityFlow objects.
 type SecurityFlows []SecurityFlow
 
+// SecurityFlow represents OAS Flows object, used by SecurityScheme.
 type SecurityFlow struct {
 	Type    string         `yaml:"type,omitempty"`
 	AuthURL URL            `yaml:"authorizationUrl,omitempty"`
 	Scopes  SecurityScopes `yaml:"scopes,omitempty"`
 }
 
+// SecurityScopes is a slice of SecurityScope objects.
 type SecurityScopes []SecurityScope
 
+// SecurityScope represents OAS SecurityScope object, used by  SecurityFlow.
 type SecurityScope struct {
 	Name        string `yaml:"name,omitempty"`
 	Description string `yaml:"description,omitempty"`
 }
 
+// isEmpty checks if *ExternalDocs struct is empty.
 func (ed *ExternalDocs) isEmpty() bool {
 	if ed == nil {
 		return true

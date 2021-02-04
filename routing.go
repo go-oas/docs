@@ -16,6 +16,9 @@ type (
 	RegRoutes map[string]RouteFn
 )
 
+// AttachRoutes if used for attaching pre-defined API documentation routes.
+//
+// fns param is a slice of functions that satisfy RouteFn signature.
 func (o *OAS) AttachRoutes(fns []RouteFn) {
 	for _, fn := range fns {
 		fnDeclaration := runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name()
@@ -26,10 +29,12 @@ func (o *OAS) AttachRoutes(fns []RouteFn) {
 	}
 }
 
+// GetRegisteredRoutes returns a map of registered RouteFn functions - in layman terms "routes".
 func (o *OAS) GetRegisteredRoutes() RegRoutes {
 	return o.RegisteredRoutes
 }
 
+// GetPathByIndex returns ptr to Path structure, by its index in the parent struct of OAS.
 func (o *OAS) GetPathByIndex(index int) *Path {
 	return &o.Paths[index]
 }

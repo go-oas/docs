@@ -132,7 +132,7 @@ func (o *OAS) mapDocAnnotations(path string) error {
 }
 
 func mapIfLineContainsOASTag(lineText string, o *OAS) {
-	if strings.Contains(lineText, OASAnnotationInit) {
+	if strings.Contains(lineText, oasAnnotationInit) {
 		annotations := oasAnnotations(strings.Fields(lineText))
 
 		var newRoute Path
