@@ -16,6 +16,14 @@ go-OAS Docs converts structured OAS3 (Swagger3) objects into the Open API Specif
 chosen route and port. It's extremely flexible and simple, so basically it can be integrated into any framework or
 existing project.
 
+## Table of Contents
+
+- [Getting Started](#getting-started)
+- [How to use](#how-to-use)
+    * [Examples](#examples)
+- [Contact](#contact)
+- [The current roadmap (planned features)](#roadmap)
+
 ## Getting Started
 
 1. Download **_docs_** by using:
@@ -111,9 +119,19 @@ above.
 
 ----
 
-## Roadmap & Project board
+## Contact
 
-Check out the current [Project board](https://github.com/go-oas/docs/projects/1) for more information about the first
-alpha release. _Note: Board & project are still in its early phase._
+Check out the current [Project board](https://github.com/go-oas/docs/projects/1) for more information.
 
-You can join projects Telegram group at: [https://t.me/go_oas](https://t.me/go_oas)
+You can join our Telegram group at: [https://t.me/go_oas](https://t.me/go_oas)
+
+## Roadmap
+
+| Feature (GH issues)                                             | Description                                                                              | Release |
+| --------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ------- |
+| [Validation](https://github.com/go-oas/docs/issues/17)          | Add validation to all structures based on OAS3.0.3                                       | v1.1.0  |
+| [CLI](https://github.com/go-oas/docs/issues/18)                 | Add CLI support - make it CLI friendly                                                   | v1.2.0  |
+| [Postman](https://github.com/go-oas/docs/issues/19)             | Add postman support via PM API                                                           | v1.3.0  |
+| [ReDoc](https://github.com/go-oas/docs/issues/20)               | Add ReDoc support as an alternative to SwaggerUI                                         | v1.4.0  |
+| [E2E Auto-generation](https://github.com/go-oas/docs/issues/21) | Go tests conversion to Cypress/Katalon suites (convert mocked unit tests into e2e tests) | v1.5.0  |
+
