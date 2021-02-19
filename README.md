@@ -11,6 +11,8 @@
 [![Coverage Status](https://coveralls.io/repos/github/go-oas/docs/badge.svg?branch=main)](https://coveralls.io/github/go-oas/docs?branch=main)
 [![codebeat badge](https://codebeat.co/badges/32b86556-84e3-4db9-9f11-923d12994f90)](https://codebeat.co/projects/github-com-go-oas-docs-main)
 [![Go Reference](https://pkg.go.dev/badge/github.com/go-oas/docs.svg)](https://pkg.go.dev/github.com/go-oas/docs)
+[![Mentioned in Awesome Go](https://awesome.re/mentioned-badge.svg)](https://awesome-go.com)
+
 
 go-OAS Docs converts structured OAS3 (Swagger3) objects into the Open API Specification & automatically serves it on
 chosen route and port. It's extremely flexible and simple, so basically it can be integrated into any framework or
