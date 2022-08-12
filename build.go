@@ -137,6 +137,7 @@ func makeAllPathsMap(paths *Paths) pathsMap {
 		pathMap[keyTags] = path.Tags
 		pathMap[keySummary] = path.Summary
 		pathMap[keyOperationID] = path.OperationID
+		pathMap[keyDescription] = path.Description
 		pathMap[keySecurity] = makeSecurityMap(&path.Security)
 		pathMap[keyRequestBody] = makeRequestBodyMap(&path.RequestBody)
 		pathMap[keyResponses] = makeResponsesMap(&path.Responses)

@@ -5,7 +5,7 @@ import "github.com/go-oas/docs"
 func handleCreateUserRoute(oasPathIndex int, oas *docs.OAS) {
 	path := oas.GetPathByIndex(oasPathIndex)
 
-	path.Summary = "Create a new User"
+	path.Description = "Create a new User"
 	path.OperationID = "createUser"
 
 	path.RequestBody = docs.RequestBody{
@@ -34,7 +34,7 @@ func handleCreateUserRoute(oasPathIndex int, oas *docs.OAS) {
 func handleGetUserRoute(oasPathIndex int, oas *docs.OAS) {
 	path := oas.GetPathByIndex(oasPathIndex)
 
-	path.Summary = "Get a User"
+	path.Description = "Get a User"
 	path.OperationID = "getUser"
 	path.RequestBody = docs.RequestBody{}
 	path.Responses = docs.Responses{
