@@ -247,19 +247,19 @@ func makeComponentSchemasMap(schemas *Schemas) map[string]interface{} {
 
 	for _, s := range *schemas {
 		scheme := make(map[string]interface{})
-		scheme[keyType] = s.Type
 
 		if s.Ref != "" {
+			scheme[keyType] = s.Type
 			scheme[keyRef] = s.Ref
+			schemesMap[s.Name] = scheme
+
+			if s.XML.Name != "" {
+				scheme[keyXML] = s.XML
+			}
+
 		} else {
 			scheme[keyProperties] = makePropertiesMap(&s.Properties)
 		}
-
-		if s.XML.Name != "" {
-			scheme[keyXML] = s.XML
-		}
-
-		schemesMap[s.Name] = scheme
 	}
 
 	return schemesMap
