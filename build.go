@@ -249,16 +249,15 @@ func makeComponentSchemasMap(schemas *Schemas) map[string]interface{} {
 		scheme := make(map[string]interface{})
 
 		if s.Ref != "" {
-			scheme[keyType] = s.Type
 			scheme[keyRef] = s.Ref
+		} else {
+			scheme[keyType] = s.Type
 			schemesMap[s.Name] = scheme
+			scheme[keyProperties] = makePropertiesMap(&s.Properties)
 
 			if s.XML.Name != "" {
 				scheme[keyXML] = s.XML
 			}
-
-		} else {
-			scheme[keyProperties] = makePropertiesMap(&s.Properties)
 		}
 	}
 
