@@ -38,3 +38,9 @@ func (o *OAS) GetRegisteredRoutes() RegRoutes {
 func (o *OAS) GetPathByIndex(index int) *Path {
 	return &o.Paths[index]
 }
+
+// AddRoute is used for add API documentation routes.
+//
+func (o *OAS) AddRoute(path Path) {
+	o.Paths = append(o.Paths, path)
+}

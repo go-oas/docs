@@ -38,7 +38,7 @@ func getPathFromFirstElement(cbs []ConfigBuilder) string {
 func (o *OAS) BuildDocs(conf ...ConfigBuilder) error {
 	o.initCallStackForRoutes()
 
-	yml, err := marshalToYAML(o)
+	yml, err := o.marshalToYAML()
 	if err != nil {
 		return fmt.Errorf("marshaling issue occurred: %w", err)
 	}
@@ -51,7 +51,23 @@ func (o *OAS) BuildDocs(conf ...ConfigBuilder) error {
 	return nil
 }
 
-func marshalToYAML(oas *OAS) ([]byte, error) {
+// BuildStream marshals the OAS struct to YAML and writes it to a stream.
+//
+// Returns an error if there is any.
+func (o *OAS) BuildStream(w io.Writer) error {
+	yml, err := o.marshalToYAML()
+	if err != nil {
+		return fmt.Errorf("marshaling issue occurred: %w", err)
+	}
+
+	err = writeAndFlush(yml, w)
+	if err != nil {
+		return fmt.Errorf("writing issue occurred: %w", err)
+	}
+	return nil
+}
+
+func (oas *OAS) marshalToYAML() ([]byte, error) {
 	transformedOAS := oas.transformToHybridOAS()
 
 	yml, err := yaml.Marshal(transformedOAS)
