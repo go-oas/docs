@@ -156,15 +156,15 @@ func makeRequestBodyMap(reqBody *RequestBody) map[string]interface{} {
 	return reqBodyMap
 }
 
-func makeResponsesMap(responses *Responses) map[uint]interface{} {
-	responsesMap := make(map[uint]interface{}, len(*responses))
+func makeResponsesMap(responses *Responses) map[string]interface{} {
+	responsesMap := make(map[string]interface{}, len(*responses))
 
 	for _, resp := range *responses {
 		codeBodyMap := make(map[string]interface{})
 		codeBodyMap[keyDescription] = resp.Description
 		codeBodyMap[keyContent] = makeContentSchemaMap(resp.Content)
 
-		responsesMap[resp.Code] = codeBodyMap
+		responsesMap[fmt.Sprintf("%d", resp.Code)] = codeBodyMap
 	}
 
 	return responsesMap
