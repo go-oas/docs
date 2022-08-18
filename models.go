@@ -98,6 +98,7 @@ type Path struct {
 	HTTPMethod      string           `yaml:"httpMethod"`
 	Tags            []string         `yaml:"tags"`
 	Summary         string           `yaml:"summary"`
+	Description     string           `yaml:"description"`
 	OperationID     string           `yaml:"operationId"`
 	RequestBody     RequestBody      `yaml:"requestBody"`
 	Responses       Responses        `yaml:"responses"`
