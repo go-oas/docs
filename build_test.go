@@ -1,6 +1,9 @@
 package docs
 
-import "testing"
+import (
+	"bytes"
+	"testing"
+)
 
 func TestUnitBuild(t *testing.T) {
 	t.Parallel()
@@ -109,3 +112,124 @@ func TestUnitGetPathFromFirstElem(t *testing.T) {
 }
 
 // QUICK CHECK TESTS ARE COMING WITH NEXT RELEASE.
+
+func TestOAS_BuildStream(t *testing.T) {
+	tests := []struct {
+		name    string
+		oas     *OAS
+		wantW   string
+		wantErr bool
+	}{
+		{
+			name: "success",
+			oas: &OAS{
+				OASVersion: "3.0.1",
+				Info: Info{
+					Title:       "Test",
+					Description: "Test object",
+				},
+				Components: Components{
+					Component{
+						Schemas: Schemas{Schema{
+							Name: "schema_testing",
+							Properties: SchemaProperties{
+								SchemaProperty{
+									Name:        "EnumProp",
+									Type:        "enum",
+									Description: "short desc",
+									Enum:        []string{"enum", "test", "strSlc"},
+								},
+								SchemaProperty{
+									Name:        "intProp",
+									Type:        "integer",
+									Format:      "int64",
+									Description: "short desc",
+									Default:     1337,
+								},
+							},
+							XML: XMLEntry{Name: "XML entry test"},
+						}},
+						SecuritySchemes: SecuritySchemes{SecurityScheme{
+							Name: "ses_scheme_testing",
+							In:   "not empty",
+							Flows: SecurityFlows{SecurityFlow{
+								Type:    "implicit",
+								AuthURL: "http://petstore.swagger.io/oauth/dialog",
+								Scopes: SecurityScopes{
+									SecurityScope{
+										Name:        "write:pets",
+										Description: "Write to Pets",
+									},
+									SecurityScope{
+										Name:        "read:pets",
+										Description: "Read Pets",
+									},
+								},
+							}},
+						}},
+					},
+				},
+			},
+			wantErr: false,
+			wantW: `openapi: 3.0.1
+info:
+    title: Test
+    description: Test object
+    termsOfService: ""
+    contact:
+        email: ""
+    license:
+        name: ""
+        url: ""
+    version: ""
+externalDocs:
+    description: ""
+    url: ""
+servers: []
+tags: []
+paths: {}
+components:
+    schemas:
+        schema_testing:
+            $ref: ""
+            properties:
+                EnumProp:
+                    description: short desc
+                    enum:
+                        - enum
+                        - test
+                        - strSlc
+                    type: enum
+                intProp:
+                    default: 1337
+                    description: short desc
+                    format: int64
+                    type: integer
+            type: ""
+            xml:
+                name: XML entry test
+    securitySchemes:
+        ses_scheme_testing:
+            flows:
+                implicit:
+                    authorizationUrl: http://petstore.swagger.io/oauth/dialog
+                    scopes:
+                        read:pets: Read Pets
+                        write:pets: Write to Pets
+            in: not empty
+`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			w := &bytes.Buffer{}
+			if err := tt.oas.BuildStream(w); (err != nil) != tt.wantErr {
+				t.Errorf("OAS.BuildStream() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotW := w.String(); gotW != tt.wantW {
+				t.Errorf("OAS.BuildStream() = [%v], want {%v}", gotW, tt.wantW)
+			}
+		})
+	}
+}

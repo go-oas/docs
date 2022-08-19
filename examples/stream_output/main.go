@@ -53,7 +53,7 @@ func main() {
 		},
 		// HandlerFuncName: "handleCreateUser",
 		RequestBody: docs.RequestBody{
-			Description: "Create a new User",
+			Description: "Get a user",
 			Content: docs.ContentTypes{
 				getContentApplicationJSON("#/components/schemas/User"),
 			},
@@ -75,14 +75,6 @@ func main() {
 			return
 		}
 	})
-
-	// print routes
-	// hm := reflect.ValueOf(mux).Elem()
-	// fl := hm.FieldByIndex([]int{1})
-	// fmt.Printf("%+v\n", fl)
-
-	// path, _ := os.Getwd()
-	// fmt.Printf("cwd: %s\n", path)
 
 	fmt.Printf("Listening at :%d", port)
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), LogginMiddleware(mux)); err != nil {
