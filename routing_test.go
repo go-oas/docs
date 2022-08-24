@@ -270,7 +270,6 @@ func TestQuickUnitAttachRoutes(t *testing.T) {
 }
 
 func TestOAS_AddRoute(t *testing.T) {
-
 	var (
 		respose200         = Response{Code: 200, Description: "Ok"}
 		respose404         = Response{Code: 404, Description: "Not Found"}

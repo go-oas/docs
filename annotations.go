@@ -26,14 +26,14 @@ type (
 // MapAnnotationsInPath scanIn is relevant from initiator calling it.
 //
 // It accepts the path in which to scan for annotations within Go files.
-func (o *OAS) MapAnnotationsInPath(scanIn string, conf ...configAnnotation) error {
+func (oas *OAS) MapAnnotationsInPath(scanIn string, conf ...configAnnotation) error {
 	filesInPath, err := scanForChangesInPath(scanIn, getWDFn(conf), walkFilepath)
 	if err != nil {
 		return fmt.Errorf(" :%w", err)
 	}
 
 	for _, file := range filesInPath {
-		err = o.mapDocAnnotations(file)
+		err = oas.mapDocAnnotations(file)
 		if err != nil {
 			return fmt.Errorf(" :%w", err)
 		}
@@ -103,8 +103,8 @@ func walkFilepath(pathToTraverse string, walker walkerFn) ([]string, error) {
 	return files, nil
 }
 
-func (o *OAS) mapDocAnnotations(path string) error {
-	if o == nil {
+func (oas *OAS) mapDocAnnotations(path string) error {
+	if oas == nil {
 		return errors.New("pointer to OASHandlers can not be nil")
 	}
 
@@ -119,7 +119,7 @@ func (o *OAS) mapDocAnnotations(path string) error {
 	line := 1
 
 	for scanner.Scan() {
-		mapIfLineContainsOASTag(scanner.Text(), o)
+		mapIfLineContainsOASTag(scanner.Text(), oas)
 		line++
 	}
 

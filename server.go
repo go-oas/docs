@@ -21,7 +21,8 @@ const (
 )
 
 // ConfigSwaggerUI represents a structure which will be used to pass required configuration params to
-//		the ServeSwaggerUI func.
+//
+//	the ServeSwaggerUI func.
 type ConfigSwaggerUI struct {
 	Route string
 	Port  string

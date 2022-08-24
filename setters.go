@@ -1,13 +1,13 @@
 package docs
 
 // SetOASVersion sets the OAS version, by casting string to OASVersion type.
-func (o *OAS) SetOASVersion(ver string) {
-	o.OASVersion = OASVersion(ver)
+func (oas *OAS) SetOASVersion(ver string) {
+	oas.OASVersion = OASVersion(ver)
 }
 
 // GetInfo returns pointer to the Info struct.
-func (o *OAS) GetInfo() *Info {
-	return &o.Info
+func (oas *OAS) GetInfo() *Info {
+	return &oas.Info
 }
 
 // SetContact setts the contact on the Info struct.

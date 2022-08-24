@@ -8,8 +8,8 @@ import (
 const routePostfix = "Route"
 
 // Call is used init registered functions that already exist in the *OAS, and return results if there are any.
-func (o *OAS) Call(name string, params ...interface{}) (result []reflect.Value) {
-	f := reflect.ValueOf(o.RegisteredRoutes[name])
+func (oas *OAS) Call(name string, params ...interface{}) (result []reflect.Value) {
+	f := reflect.ValueOf(oas.RegisteredRoutes[name])
 
 	in := make([]reflect.Value, len(params))
 	for k, param := range params {
@@ -21,8 +21,8 @@ func (o *OAS) Call(name string, params ...interface{}) (result []reflect.Value) 
 	return result
 }
 
-func (o *OAS) initCallStackForRoutes() {
-	for oasPathIndex := range o.Paths {
-		o.Call(o.Paths[oasPathIndex].HandlerFuncName+routePostfix, oasPathIndex, o)
+func (oas *OAS) initCallStackForRoutes() {
+	for oasPathIndex := range oas.Paths {
+		oas.Call(oas.Paths[oasPathIndex].HandlerFuncName+routePostfix, oasPathIndex, oas)
 	}
 }

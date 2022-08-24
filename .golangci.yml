@@ -8,12 +8,8 @@ linters-settings:
       - style
   goimports:
     local-prefixes: github.com/golangci/golangci-lint
-  golint:
-    min-confidence: 0
   govet:
     check-shadowing: true
-  maligned:
-    suggest-new: true
   misspell:
     locale: US
   nakedret:
@@ -25,7 +21,6 @@ linters:
   disable-all: true
   enable:
     - bodyclose
-    - deadcode
     - depguard
     - dogsled
     - dupl
@@ -40,7 +35,6 @@ linters:
     - godot
     - gofmt
     - goimports
-    - golint
     - gomnd
     - gomodguard
     - goprintffuncname
@@ -48,22 +42,18 @@ linters:
     - gosimple
     - govet
     - ineffassign
-    - interfacer
     - lll
-    - maligned
     - misspell
     - nakedret
     - nestif
     - prealloc
     - rowserrcheck
     - staticcheck
-    - structcheck
     - stylecheck
     - typecheck
     - unconvert
     - unparam
     - unused
-    - varcheck
     - whitespace
     - wsl
     - asciicheck

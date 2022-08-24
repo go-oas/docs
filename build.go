@@ -35,10 +35,10 @@ func getPathFromFirstElement(cbs []ConfigBuilder) string {
 // BuildDocs marshals the OAS struct to YAML and saves it to the chosen output file.
 //
 // Returns an error if there is any.
-func (o *OAS) BuildDocs(conf ...ConfigBuilder) error {
-	o.initCallStackForRoutes()
+func (oas *OAS) BuildDocs(conf ...ConfigBuilder) error {
+	oas.initCallStackForRoutes()
 
-	yml, err := o.marshalToYAML()
+	yml, err := oas.marshalToYAML()
 	if err != nil {
 		return fmt.Errorf("marshaling issue occurred: %w", err)
 	}
@@ -54,8 +54,8 @@ func (o *OAS) BuildDocs(conf ...ConfigBuilder) error {
 // BuildStream marshals the OAS struct to YAML and writes it to a stream.
 //
 // Returns an error if there is any.
-func (o *OAS) BuildStream(w io.Writer) error {
-	yml, err := o.marshalToYAML()
+func (oas *OAS) BuildStream(w io.Writer) error {
+	yml, err := oas.marshalToYAML()
 	if err != nil {
 		return fmt.Errorf("marshaling issue occurred: %w", err)
 	}
@@ -127,17 +127,17 @@ type hybridOAS struct {
 	Components   componentsMap `yaml:"components"`
 }
 
-func (o *OAS) transformToHybridOAS() hybridOAS {
+func (oas *OAS) transformToHybridOAS() hybridOAS {
 	ho := hybridOAS{}
 
-	ho.OpenAPI = o.OASVersion
-	ho.Info = o.Info
-	ho.ExternalDocs = o.ExternalDocs
-	ho.Servers = o.Servers
-	ho.Tags = o.Tags
+	ho.OpenAPI = oas.OASVersion
+	ho.Info = oas.Info
+	ho.ExternalDocs = oas.ExternalDocs
+	ho.Servers = oas.Servers
+	ho.Tags = oas.Tags
 
-	ho.Paths = makeAllPathsMap(&o.Paths)
-	ho.Components = makeComponentsMap(&o.Components)
+	ho.Paths = makeAllPathsMap(&oas.Paths)
+	ho.Components = makeComponentsMap(&oas.Components)
 
 	return ho
 }
