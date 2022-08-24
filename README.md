@@ -119,7 +119,9 @@ other parts of the system for that matter.
 To run examples, and checkout hosted documentation via Swagger UI, issue the following command:
 
 ```sh
-$ go run ./examples/*.go
+$ go run ./examples/file_output/*.go
+# or uncomment line 40 and comment line 38 in internal/dist/index.html before running:
+$ go run ./examples/stream_output/*.go
 ```
 
 And navigate to `http://localhost:3005/docs/api/` in case that you didn't change anything before running the example
