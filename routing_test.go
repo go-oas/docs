@@ -305,19 +305,19 @@ func TestOAS_AddRoute(t *testing.T) {
 	tests := []struct {
 		name      string
 		oas       *OAS
-		path      Path
+		path      *Path
 		wantPaths Paths
 	}{
 		{
 			name:      "success-no-existing-paths",
 			oas:       &OAS{},
-			path:      pathGetUser,
+			path:      &pathGetUser,
 			wantPaths: Paths{pathGetUser},
 		},
 		{
 			name:      "success-existing-paths",
 			oas:       &OAS{Paths: Paths{pathGetUser}},
-			path:      pathCreateUser,
+			path:      &pathCreateUser,
 			wantPaths: Paths{pathGetUser, pathCreateUser},
 		},
 	}
