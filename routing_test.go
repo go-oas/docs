@@ -268,3 +268,65 @@ func TestQuickUnitAttachRoutes(t *testing.T) {
 		t.Errorf("Check failed: %#v", err)
 	}
 }
+
+func TestOAS_AddRoute(t *testing.T) {
+	var (
+		respose200         = Response{Code: 200, Description: "Ok"}
+		respose404         = Response{Code: 404, Description: "Not Found"}
+		contentTypeUser    = ContentType{Name: "application/json", Schema: "#/components/schemas/User"}
+		requestBodyGetUser = RequestBody{
+			Description: "Get a User",
+			Content:     ContentTypes{contentTypeUser},
+			Required:    true,
+		}
+		requestBodyCreateUser = RequestBody{
+			Description: "Create a new User",
+			Content:     ContentTypes{contentTypeUser},
+			Required:    true,
+		}
+		pathGetUser = Path{
+			Route:       "/users",
+			HTTPMethod:  "GET",
+			OperationID: "getUser",
+			Summary:     "Get a User",
+			Responses:   Responses{respose200},
+			RequestBody: requestBodyGetUser,
+		}
+		pathCreateUser = Path{
+			Route:       "/users",
+			HTTPMethod:  "POST",
+			OperationID: "createUser",
+			Summary:     "Create a new User",
+			Responses:   Responses{respose200, respose404},
+			RequestBody: requestBodyCreateUser,
+		}
+	)
+
+	tests := []struct {
+		name      string
+		oas       *OAS
+		path      Path
+		wantPaths Paths
+	}{
+		{
+			name:      "success-no-existing-paths",
+			oas:       &OAS{},
+			path:      pathGetUser,
+			wantPaths: Paths{pathGetUser},
+		},
+		{
+			name:      "success-existing-paths",
+			oas:       &OAS{Paths: Paths{pathGetUser}},
+			path:      pathCreateUser,
+			wantPaths: Paths{pathGetUser, pathCreateUser},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.oas.AddRoute(tt.path)
+			if !reflect.DeepEqual(tt.wantPaths, tt.oas.Paths) {
+				t.Errorf("OAS.AddRoute() = [%v], want {%v}", tt.oas.Paths, tt.wantPaths)
+			}
+		})
+	}
+}

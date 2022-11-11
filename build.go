@@ -64,7 +64,6 @@ func (oas *OAS) BuildStream(w io.Writer) error {
 	if err != nil {
 		return fmt.Errorf("writing issue occurred: %w", err)
 	}
-
 	return nil
 }
 

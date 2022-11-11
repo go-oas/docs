@@ -1,6 +1,5 @@
 lint:
 	gofumpt -w -s ./..
-	golint ./...
 	golangci-lint run --fix
 
 test:
