@@ -24,7 +24,7 @@ func main() {
 	apiSetExternalDocs(&apiDoc)
 	apiSetComponents(&apiDoc)
 
-	apiDoc.AddRoute(docs.Path{
+	apiDoc.AddRoute(&docs.Path{
 		Route:       "/users",
 		HTTPMethod:  "POST",
 		OperationID: "createUser",
@@ -43,7 +43,7 @@ func main() {
 		},
 	})
 
-	apiDoc.AddRoute(docs.Path{
+	apiDoc.AddRoute(&docs.Path{
 		Route:       "/users",
 		HTTPMethod:  "GET",
 		OperationID: "getUser",

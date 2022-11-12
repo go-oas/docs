@@ -40,6 +40,6 @@ func (oas *OAS) GetPathByIndex(index int) *Path {
 }
 
 // AddRoute is used for add API documentation routes.
-func (oas *OAS) AddRoute(path Path) {
-	oas.Paths = append(oas.Paths, path)
+func (oas *OAS) AddRoute(path *Path) {
+	oas.Paths = append(oas.Paths, *path)
 }
