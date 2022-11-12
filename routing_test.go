@@ -270,6 +270,8 @@ func TestQuickUnitAttachRoutes(t *testing.T) {
 }
 
 func TestOAS_AddRoute(t *testing.T) {
+	t.Parallel()
+
 	var (
 		respose200         = Response{Code: 200, Description: "Ok"}
 		respose404         = Response{Code: 404, Description: "Not Found"}
@@ -321,11 +323,16 @@ func TestOAS_AddRoute(t *testing.T) {
 			wantPaths: Paths{pathGetUser, pathCreateUser},
 		},
 	}
+
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.oas.AddRoute(tt.path)
-			if !reflect.DeepEqual(tt.wantPaths, tt.oas.Paths) {
-				t.Errorf("OAS.AddRoute() = [%v], want {%v}", tt.oas.Paths, tt.wantPaths)
+		trn := tt
+
+		t.Run(trn.name, func(t *testing.T) {
+			t.Parallel()
+
+			trn.oas.AddRoute(trn.path)
+			if !reflect.DeepEqual(trn.wantPaths, trn.oas.Paths) {
+				t.Errorf("OAS.AddRoute() = [%v], want {%v}", trn.oas.Paths, trn.wantPaths)
 			}
 		})
 	}

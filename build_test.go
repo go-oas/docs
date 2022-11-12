@@ -212,16 +212,19 @@ func TestOAS_BuildStream(t *testing.T) {
 		},
 	}
 
-	t.Parallel()
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+		trn := tt
+
+		t.Run(trn.name, func(t *testing.T) {
+			t.Parallel()
+
 			w := &bytes.Buffer{}
-			if err := tt.oas.BuildStream(w); (err != nil) != tt.wantErr {
-				t.Errorf("OAS.BuildStream() error = %v, wantErr %v", err, tt.wantErr)
+			if err := trn.oas.BuildStream(w); (err != nil) != trn.wantErr {
+				t.Errorf("OAS.BuildStream() error = %v, wantErr %v", err, trn.wantErr)
 				return
 			}
-			if gotW := w.String(); gotW != tt.wantW {
-				t.Errorf("OAS.BuildStream() = [%v], want {%v}", gotW, tt.wantW)
+			if gotW := w.String(); gotW != trn.wantW {
+				t.Errorf("OAS.BuildStream() = [%v], want {%v}", gotW, trn.wantW)
 			}
 		})
 	}
