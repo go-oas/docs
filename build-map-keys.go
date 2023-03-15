@@ -23,4 +23,7 @@ const (
 	keyFlows            = "flows"
 	keyAuthorizationURL = "authorizationUrl"
 	keyScopes           = "scopes"
+	keyParameters       = "parameters"
+	keyRequired         = "required"
+	keySchema           = "schema"
 )

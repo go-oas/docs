@@ -64,6 +64,7 @@ func (oas *OAS) BuildStream(w io.Writer) error {
 	if err != nil {
 		return fmt.Errorf("writing issue occurred: %w", err)
 	}
+
 	return nil
 }
 
@@ -157,6 +158,7 @@ func makeAllPathsMap(paths *Paths) pathsMap {
 		pathMap[keySecurity] = makeSecurityMap(&path.Security)
 		pathMap[keyRequestBody] = makeRequestBodyMap(&path.RequestBody)
 		pathMap[keyResponses] = makeResponsesMap(&path.Responses)
+		pathMap[keyParameters] = makeParametersMap(&path.Parameters)
 
 		allPaths[path.Route][strings.ToLower(path.HTTPMethod)] = pathMap
 	}
@@ -344,4 +346,41 @@ const emptyStr = ""
 
 func isStrEmpty(s string) bool {
 	return s == emptyStr
+}
+
+func makeParametersMap(parameters *Parameters) []map[string]interface{} {
+	parametersMap := []map[string]interface{}{}
+
+	for _, param := range *parameters {
+		paramMap := make(map[string]interface{})
+
+		paramMap[keyName] = param.Name
+		paramMap[keyIn] = param.In
+		paramMap[keyDescription] = param.Description
+		paramMap[keyRequired] = param.Required
+		paramMap[keySchema] = makeSchemaMap(&param.Schema)
+
+		parametersMap = append(parametersMap, paramMap)
+	}
+
+	return parametersMap
+}
+
+func makeSchemaMap(schema *Schema) map[string]interface{} {
+	schemaMap := make(map[string]interface{})
+
+	if !isStrEmpty(schema.Ref) {
+		schemaMap[keyRef] = schema.Ref
+	} else {
+		schemaMap[keyName] = schema.Name
+		schemaMap[keyType] = schema.Type
+		if len(schema.Properties) > 0 {
+			schemaMap[keyProperties] = makePropertiesMap(&schema.Properties)
+		}
+		if schema.XML.Name != "" {
+			schemaMap[keyXML] = map[string]interface{}{"name": schema.XML.Name}
+		}
+	}
+
+	return schemaMap
 }

@@ -103,6 +103,7 @@ type Path struct {
 	RequestBody     RequestBody      `yaml:"requestBody"`
 	Responses       Responses        `yaml:"responses"`
 	Security        SecurityEntities `yaml:"security,omitempty"`
+	Parameters      Parameters       `yaml:"parameters,omitempty"`
 	HandlerFuncName string           `yaml:"-"`
 }
 
@@ -208,6 +209,22 @@ type SecurityScopes []SecurityScope
 type SecurityScope struct {
 	Name        string `yaml:"name,omitempty"`
 	Description string `yaml:"description,omitempty"`
+}
+
+// Parameters
+type Parameters []Parameter
+
+type Parameter struct {
+	// If in is "path", the name field MUST correspond to a template expression occurring within the path field in the Paths Object. See Path Templating for further information.
+	// If in is "header" and the name field is "Accept", "Content-Type" or "Authorization", the parameter definition SHALL be ignored.
+	// For all other cases, the name corresponds to the parameter name used by the in property.
+	Name            string `yaml:"name,omitempty"`
+	In              string `yaml:"in,omitempty"` // "query", "header", "path" or "cookie".
+	Description     string `yaml:"description,omitempty"`
+	Required        bool   `yaml:"required,omitempty"`
+	Deprecated      bool   `yaml:"deprecated,omitempty"`
+	AllowEmptyValue bool   `yaml:"allowEmptyValue,omitempty"`
+	Schema          Schema
 }
 
 // isEmpty checks if *ExternalDocs struct is empty.
