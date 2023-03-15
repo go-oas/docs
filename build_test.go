@@ -232,9 +232,12 @@ func TestOAS_BuildStream(t *testing.T) {
 }
 
 func Test_makeParametersMap(t *testing.T) {
+	t.Parallel()
+
 	type args struct {
-		parameters *Parameters
+		parameters Parameters
 	}
+
 	tests := []struct {
 		name string
 		args args
@@ -243,7 +246,7 @@ func Test_makeParametersMap(t *testing.T) {
 		{
 			name: "success-minimal",
 			args: args{
-				parameters: &Parameters{{
+				parameters: Parameters{{
 					Name:        "id",
 					In:          "path",
 					Description: "test",
@@ -262,7 +265,7 @@ func Test_makeParametersMap(t *testing.T) {
 		{
 			name: "success-full",
 			args: args{
-				parameters: &Parameters{{
+				parameters: Parameters{{
 					Name:        "id",
 					In:          "path",
 					Description: "test",
@@ -279,16 +282,19 @@ func Test_makeParametersMap(t *testing.T) {
 				"in":          "path",
 				"description": "test",
 				"required":    true,
-				"schema": map[string]interface{}{"name": "id", "type": "integer",
+				"schema": map[string]interface{}{
+					"name": "id",
+					"type": "integer",
 					"properties": map[string]interface{}{
 						"id": map[string]interface{}{"type": "integer"},
-					}},
+					},
+				},
 			}},
 		},
 		{
 			name: "success-ref",
 			args: args{
-				parameters: &Parameters{{
+				parameters: Parameters{{
 					Name:        "id",
 					In:          "path",
 					Description: "test",
@@ -307,7 +313,7 @@ func Test_makeParametersMap(t *testing.T) {
 		{
 			name: "success-xml-entry",
 			args: args{
-				parameters: &Parameters{{
+				parameters: Parameters{{
 					Name:        "id",
 					In:          "path",
 					Description: "test",
@@ -325,9 +331,13 @@ func Test_makeParametersMap(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := makeParametersMap(tt.args.parameters); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("makeParametersMap() = %+v, want %+v", got, tt.want)
+		trn := tt
+
+		t.Run(trn.name, func(t *testing.T) {
+			t.Parallel()
+
+			if got := makeParametersMap(trn.args.parameters); !reflect.DeepEqual(got, trn.want) {
+				t.Errorf("makeParametersMap() = %+v, want %+v", got, trn.want)
 			}
 		})
 	}

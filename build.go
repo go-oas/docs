@@ -158,7 +158,7 @@ func makeAllPathsMap(paths *Paths) pathsMap {
 		pathMap[keySecurity] = makeSecurityMap(&path.Security)
 		pathMap[keyRequestBody] = makeRequestBodyMap(&path.RequestBody)
 		pathMap[keyResponses] = makeResponsesMap(&path.Responses)
-		pathMap[keyParameters] = makeParametersMap(&path.Parameters)
+		pathMap[keyParameters] = makeParametersMap(path.Parameters)
 
 		allPaths[path.Route][strings.ToLower(path.HTTPMethod)] = pathMap
 	}
@@ -348,11 +348,14 @@ func isStrEmpty(s string) bool {
 	return s == emptyStr
 }
 
-func makeParametersMap(parameters *Parameters) []map[string]interface{} {
+func makeParametersMap(parameters Parameters) []map[string]interface{} {
 	parametersMap := []map[string]interface{}{}
 
-	for _, param := range *parameters {
-		paramMap := make(map[string]interface{})
+	for i := 0; i < len(parameters); i++ {
+		var (
+			param    = &parameters[i]
+			paramMap = make(map[string]interface{})
+		)
 
 		paramMap[keyName] = param.Name
 		paramMap[keyIn] = param.In
