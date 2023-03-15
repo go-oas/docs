@@ -47,7 +47,6 @@ linters:
     - nakedret
     - nestif
     - prealloc
-    - rowserrcheck
     - staticcheck
     - stylecheck
     - typecheck
@@ -64,7 +63,6 @@ linters:
     - gofumpt
     - goheader
     - noctx
-    - sqlclosecheck
     - errorlint
     - paralleltest
     - tparallel
@@ -84,3 +82,8 @@ issues:
     - path: _test\.go
       linters:
         - exhaustivestruct
+        - funlen
+        - wrapcheck
+    - path: server.go
+      linters:
+        - wrapcheck

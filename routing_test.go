@@ -270,6 +270,8 @@ func TestQuickUnitAttachRoutes(t *testing.T) {
 }
 
 func TestOAS_AddRoute(t *testing.T) {
+	t.Parallel()
+
 	var (
 		respose200         = Response{Code: 200, Description: "Ok"}
 		respose404         = Response{Code: 404, Description: "Not Found"}
@@ -305,27 +307,32 @@ func TestOAS_AddRoute(t *testing.T) {
 	tests := []struct {
 		name      string
 		oas       *OAS
-		path      Path
+		path      *Path
 		wantPaths Paths
 	}{
 		{
 			name:      "success-no-existing-paths",
 			oas:       &OAS{},
-			path:      pathGetUser,
+			path:      &pathGetUser,
 			wantPaths: Paths{pathGetUser},
 		},
 		{
 			name:      "success-existing-paths",
 			oas:       &OAS{Paths: Paths{pathGetUser}},
-			path:      pathCreateUser,
+			path:      &pathCreateUser,
 			wantPaths: Paths{pathGetUser, pathCreateUser},
 		},
 	}
+
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.oas.AddRoute(tt.path)
-			if !reflect.DeepEqual(tt.wantPaths, tt.oas.Paths) {
-				t.Errorf("OAS.AddRoute() = [%v], want {%v}", tt.oas.Paths, tt.wantPaths)
+		trn := tt
+
+		t.Run(trn.name, func(t *testing.T) {
+			t.Parallel()
+
+			trn.oas.AddRoute(trn.path)
+			if !reflect.DeepEqual(trn.wantPaths, trn.oas.Paths) {
+				t.Errorf("OAS.AddRoute() = [%v], want {%v}", trn.oas.Paths, trn.wantPaths)
 			}
 		})
 	}

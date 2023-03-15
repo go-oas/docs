@@ -1,5 +1,5 @@
 lint:
-	gofumpt -w -s ./..
+	gofumpt -w ./..
 	golangci-lint run --fix
 
 test:

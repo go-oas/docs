@@ -18,6 +18,7 @@ const (
 	defaultIndexPath           = "/index.html"
 	fwSlashSuffix              = "/"
 	sigContSleeperMilliseconds = 20
+	readHeaderTimeout          = 60 * time.Second // same than nginx
 )
 
 // ConfigSwaggerUI represents a structure which will be used to pass required configuration params to
@@ -156,8 +157,9 @@ func (c *ConfigSwaggerUI) initializeDefaultHTTPServer() {
 	fileServer := http.FileServer(c.initFS)
 
 	c.httpServer = &http.Server{
-		Addr:    fmt.Sprintf(":%s", c.Port),
-		Handler: http.StripPrefix(strings.TrimRight(c.Route, fwSlashSuffix), fileServer),
+		Addr:              fmt.Sprintf(":%s", c.Port),
+		Handler:           http.StripPrefix(strings.TrimRight(c.Route, fwSlashSuffix), fileServer),
+		ReadHeaderTimeout: readHeaderTimeout,
 	}
 }
 
