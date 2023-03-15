@@ -2,6 +2,7 @@ package docs
 
 import (
 	"bytes"
+	"reflect"
 	"testing"
 )
 
@@ -225,6 +226,118 @@ func TestOAS_BuildStream(t *testing.T) {
 			}
 			if gotW := w.String(); gotW != trn.wantW {
 				t.Errorf("OAS.BuildStream() = [%v], want {%v}", gotW, trn.wantW)
+			}
+		})
+	}
+}
+
+func Test_makeParametersMap(t *testing.T) {
+	t.Parallel()
+
+	type args struct {
+		parameters Parameters
+	}
+
+	tests := []struct {
+		name string
+		args args
+		want []map[string]interface{}
+	}{
+		{
+			name: "success-minimal",
+			args: args{
+				parameters: Parameters{{
+					Name:        "id",
+					In:          "path",
+					Description: "test",
+					Required:    true,
+					Schema:      Schema{Name: "id", Type: "integer"},
+				}},
+			},
+			want: []map[string]interface{}{{
+				"name":        "id",
+				"in":          "path",
+				"description": "test",
+				"required":    true,
+				"schema":      map[string]interface{}{"name": "id", "type": "integer"},
+			}},
+		},
+		{
+			name: "success-full",
+			args: args{
+				parameters: Parameters{{
+					Name:        "id",
+					In:          "path",
+					Description: "test",
+					Required:    true,
+					Schema: Schema{
+						Name:       "id",
+						Type:       "integer",
+						Properties: SchemaProperties{{Name: "id", Type: "integer"}},
+					},
+				}},
+			},
+			want: []map[string]interface{}{{
+				"name":        "id",
+				"in":          "path",
+				"description": "test",
+				"required":    true,
+				"schema": map[string]interface{}{
+					"name": "id",
+					"type": "integer",
+					"properties": map[string]interface{}{
+						"id": map[string]interface{}{"type": "integer"},
+					},
+				},
+			}},
+		},
+		{
+			name: "success-ref",
+			args: args{
+				parameters: Parameters{{
+					Name:        "id",
+					In:          "path",
+					Description: "test",
+					Required:    true,
+					Schema:      Schema{Ref: "$some-ref"},
+				}},
+			},
+			want: []map[string]interface{}{{
+				"name":        "id",
+				"in":          "path",
+				"description": "test",
+				"required":    true,
+				"schema":      map[string]interface{}{"$ref": "$some-ref"},
+			}},
+		},
+		{
+			name: "success-xml-entry",
+			args: args{
+				parameters: Parameters{{
+					Name:        "id",
+					In:          "path",
+					Description: "test",
+					Required:    true,
+					Schema:      Schema{Name: "id", Type: "integer", XML: XMLEntry{Name: "id"}},
+				}},
+			},
+			want: []map[string]interface{}{{
+				"name":        "id",
+				"in":          "path",
+				"description": "test",
+				"required":    true,
+				"schema":      map[string]interface{}{"name": "id", "type": "integer", "xml": map[string]interface{}{"name": "id"}},
+			}},
+		},
+	}
+	for _, tt := range tests {
+		trn := tt
+
+		t.Run(trn.name, func(t *testing.T) {
+			t.Parallel()
+
+			if got := makeParametersMap(trn.args.parameters); !reflect.DeepEqual(got, trn.want) {
+				t.Errorf("makeParametersMap() = %+v, want %+v", got, trn.want)
 			}
 		})
 	}
