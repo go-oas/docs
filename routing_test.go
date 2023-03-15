@@ -48,11 +48,13 @@ func TestUnitGetRegisteredRoutes(t *testing.T) {
 	v := rand.Intn(1000-1) + 1 //nolint:gosec //ignored in tests.
 	regRoutes := fetchRegRoutes(t, v)
 
-	tests := []struct {
+	type st struct {
 		name   string
 		fields fields
 		want   RegRoutes
-	}{
+	}
+
+	tests := []st{
 		{
 			name: "success getting registered routes",
 			fields: fields{
@@ -61,15 +63,17 @@ func TestUnitGetRegisteredRoutes(t *testing.T) {
 			want: regRoutes,
 		},
 	}
-	for _, tt := range tests { //nolint:paralleltest //ignore.
-		t.Run(tt.name, func(t *testing.T) {
+	for _, tt := range tests {
+		stin := tt
+
+		t.Run(stin.name, func(t *testing.T) {
 			t.Parallel()
 
 			o := &OAS{
-				RegisteredRoutes: tt.fields.registeredRoutes,
+				RegisteredRoutes: stin.fields.registeredRoutes,
 			}
 			got := o.GetRegisteredRoutes()
-			want := tt.want
+			want := stin.want
 
 			if !reflect.DeepEqual(got, want) {
 				t.Errorf("GetRegisteredRoutes() = %v, want %v", got, want)
@@ -86,6 +90,12 @@ func TestUnitGetPathByIndex(t *testing.T) {
 		registeredRoutes RegRoutes
 	}
 
+	type st struct {
+		name   string
+		fields fields
+		want   *Path
+	}
+
 	paths := Paths{
 		Path{
 			Route:      "/test",
@@ -96,11 +106,7 @@ func TestUnitGetPathByIndex(t *testing.T) {
 	v := rand.Intn(1000-1) + 1 //nolint:gosec //ignored in tests.
 	regRoutes := fetchRegRoutes(t, v)
 
-	tests := []struct {
-		name   string
-		fields fields
-		want   *Path
-	}{
+	tests := []st{
 		{
 			name: "success get paths",
 			fields: fields{
@@ -110,17 +116,17 @@ func TestUnitGetPathByIndex(t *testing.T) {
 			want: &paths[0],
 		},
 	}
-	for _, tt := range tests { //nolint:paralleltest //Range statement for test TestUnitGetPathByIndex
-		// does not reinitialise the variable tt -> TODO: Troubleshoot this further
-		t.Run(tt.name, func(t *testing.T) {
+	for _, tt := range tests {
+		stin := tt
+		t.Run(stin.name, func(t *testing.T) {
 			t.Parallel()
 
 			o := &OAS{
-				Paths:            tt.fields.Paths,
-				RegisteredRoutes: tt.fields.registeredRoutes,
+				Paths:            stin.fields.Paths,
+				RegisteredRoutes: stin.fields.registeredRoutes,
 			}
-			if got := o.GetPathByIndex(0); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetPathByIndex() = %v, want %v", got, tt.want)
+			if got := o.GetPathByIndex(0); !reflect.DeepEqual(got, stin.want) {
+				t.Errorf("GetPathByIndex() = %v, want %v", got, stin.want)
 			}
 		})
 	}
