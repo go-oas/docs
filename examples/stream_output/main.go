@@ -47,6 +47,24 @@ func main() {
 		Route:       "/users",
 		HTTPMethod:  "GET",
 		OperationID: "getUser",
+		Summary:     "Get Users list",
+		Responses: docs.Responses{
+			getResponseOK(),
+		},
+		// HandlerFuncName: "handleCreateUser",
+		RequestBody: docs.RequestBody{
+			Description: "Get Users list",
+			Content: docs.ContentTypes{
+				getContentApplicationJSON("#/components/schemas/User"),
+			},
+			Required: true,
+		},
+	})
+
+	apiDoc.AddRoute(&docs.Path{
+		Route:       "/users/{id}",
+		HTTPMethod:  "GET",
+		OperationID: "getUser",
 		Summary:     "Get a User",
 		Responses: docs.Responses{
 			getResponseOK(),
@@ -59,6 +77,16 @@ func main() {
 			},
 			Required: true,
 		},
+		Parameters: docs.Parameters{{
+			Name:        "id",
+			Description: "User ID",
+			In:          "path",
+			Required:    true,
+			Schema: docs.Schema{
+				Name: "id",
+				Type: "string",
+			},
+		}},
 	})
 
 	mux := http.NewServeMux()
