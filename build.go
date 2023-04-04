@@ -239,20 +239,30 @@ func makePropertiesMap(properties *SchemaProperties) map[string]interface{} {
 			propMap[keyType] = prop.Type
 		}
 
-		if !isStrEmpty(prop.Format) {
-			propMap[keyFormat] = prop.Format
-		}
+		if prop.Ref != "" {
+			if prop.Ref != "" {
+				propMap[keyRef] = prop.Ref
+			}
+		} else {
+			if !isStrEmpty(prop.Format) {
+				propMap[keyFormat] = prop.Format
+			}
 
-		if !isStrEmpty(prop.Description) {
-			propMap[keyDescription] = prop.Description
-		}
+			if !isStrEmpty(prop.Description) {
+				propMap[keyDescription] = prop.Description
+			}
 
-		if len(prop.Enum) > 0 {
-			propMap[keyEnum] = prop.Enum
-		}
+			if len(prop.Enum) > 0 {
+				propMap[keyEnum] = prop.Enum
+			}
 
-		if prop.Default != nil {
-			propMap[keyDefault] = prop.Default
+			if prop.Default != nil {
+				propMap[keyDefault] = prop.Default
+			}
+
+			if prop.Properties != nil {
+				propMap[keyProperties] = makePropertiesMap(prop.Properties)
+			}
 		}
 
 		propertiesMap[prop.Name] = propMap

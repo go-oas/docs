@@ -173,12 +173,14 @@ type SchemaProperties []SchemaProperty
 
 // SchemaProperty represents OAS schema object, used by Schema.
 type SchemaProperty struct {
-	Name        string      `yaml:"-"`
-	Type        string      // OAS3.0 data types - e.g. integer, boolean, string
-	Format      string      `yaml:"format,omitempty"`
-	Description string      `yaml:"description,omitempty"`
-	Enum        []string    `yaml:"enum,omitempty"`
-	Default     interface{} `yaml:"default,omitempty"`
+	Name        string            `yaml:"-"`
+	Type        string            // OAS3.0 data types - e.g. integer, boolean, string
+	Format      string            `yaml:"format,omitempty"`
+	Description string            `yaml:"description,omitempty"`
+	Ref         string            `yaml:"$ref,omitempty"`
+	Enum        []string          `yaml:"enum,omitempty"`
+	Default     interface{}       `yaml:"default,omitempty"`
+	Properties  *SchemaProperties `yaml:"properties,omitempty"`
 }
 
 // SecuritySchemes is a slice of SecuritySchemes objects.
