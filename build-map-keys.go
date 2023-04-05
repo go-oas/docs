@@ -26,4 +26,5 @@ const (
 	keyParameters       = "parameters"
 	keyRequired         = "required"
 	keySchema           = "schema"
+	keyItems            = "items"
 )

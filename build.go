@@ -235,37 +235,44 @@ func makePropertiesMap(properties *SchemaProperties) map[string]interface{} {
 	for _, prop := range *properties {
 		propMap := make(map[string]interface{})
 
+		propertiesMap[prop.Name] = propMap
+
 		if !isStrEmpty(prop.Type) {
 			propMap[keyType] = prop.Type
 		}
 
-		if prop.Ref != "" {
-			if prop.Ref != "" {
-				propMap[keyRef] = prop.Ref
-			}
-		} else {
-			if !isStrEmpty(prop.Format) {
-				propMap[keyFormat] = prop.Format
-			}
-
-			if !isStrEmpty(prop.Description) {
-				propMap[keyDescription] = prop.Description
-			}
-
-			if len(prop.Enum) > 0 {
-				propMap[keyEnum] = prop.Enum
-			}
-
-			if prop.Default != nil {
-				propMap[keyDefault] = prop.Default
-			}
-
-			if prop.Properties != nil {
-				propMap[keyProperties] = makePropertiesMap(prop.Properties)
-			}
+		if !isStrEmpty(prop.Description) {
+			propMap[keyDescription] = prop.Description
 		}
 
-		propertiesMap[prop.Name] = propMap
+		if prop.Ref != "" {
+			propMap[keyRef] = prop.Ref
+			continue
+		}
+
+		if prop.Items != nil {
+			propMap[keyItems] = makeItemsMap(prop.Items)
+			continue
+		}
+
+		if prop.Properties != nil {
+			propMap[keyProperties] = makePropertiesMap(prop.Properties)
+		}
+
+		// else {
+		if !isStrEmpty(prop.Format) {
+			propMap[keyFormat] = prop.Format
+		}
+
+		if len(prop.Enum) > 0 {
+			propMap[keyEnum] = prop.Enum
+		}
+
+		if prop.Default != nil {
+			propMap[keyDefault] = prop.Default
+		}
+
+		// }
 	}
 
 	return propertiesMap
@@ -279,15 +286,22 @@ func makeComponentSchemasMap(schemas *Schemas) map[string]interface{} {
 
 		if s.Ref != "" {
 			scheme[keyRef] = s.Ref
-		} else {
-			scheme[keyType] = s.Type
-			schemesMap[s.Name] = scheme
-			scheme[keyProperties] = makePropertiesMap(&s.Properties)
-
-			if s.XML.Name != "" {
-				scheme[keyXML] = s.XML
-			}
+			continue
 		}
+
+		if s.Items != nil {
+			scheme[keyItems] = makeItemsMap(s.Items)
+			continue
+		}
+
+		scheme[keyType] = s.Type
+		scheme[keyProperties] = makePropertiesMap(&s.Properties)
+
+		if s.XML.Name != "" {
+			scheme[keyXML] = s.XML
+		}
+
+		schemesMap[s.Name] = scheme
 	}
 
 	return schemesMap
@@ -396,4 +410,14 @@ func makeSchemaMap(schema *Schema) map[string]interface{} {
 	}
 
 	return schemaMap
+}
+
+func makeItemsMap(items *ArrayItems) map[string]interface{} {
+	itemsMap := make(map[string]interface{})
+
+	if !isStrEmpty(items.Ref) {
+		itemsMap[keyRef] = items.Ref
+	}
+
+	return itemsMap
 }
