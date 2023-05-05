@@ -235,16 +235,33 @@ func makePropertiesMap(properties *SchemaProperties) map[string]interface{} {
 	for _, prop := range *properties {
 		propMap := make(map[string]interface{})
 
+		propertiesMap[prop.Name] = propMap
+
 		if !isStrEmpty(prop.Type) {
 			propMap[keyType] = prop.Type
 		}
 
-		if !isStrEmpty(prop.Format) {
-			propMap[keyFormat] = prop.Format
-		}
-
 		if !isStrEmpty(prop.Description) {
 			propMap[keyDescription] = prop.Description
+		}
+
+		if prop.Ref != "" {
+			propMap[keyRef] = prop.Ref
+			continue
+		}
+
+		if prop.Items != nil {
+			propMap[keyItems] = makeItemsMap(prop.Items)
+			continue
+		}
+
+		if prop.Properties != nil {
+			propMap[keyProperties] = makePropertiesMap(prop.Properties)
+		}
+
+		// else {
+		if !isStrEmpty(prop.Format) {
+			propMap[keyFormat] = prop.Format
 		}
 
 		if len(prop.Enum) > 0 {
@@ -255,7 +272,7 @@ func makePropertiesMap(properties *SchemaProperties) map[string]interface{} {
 			propMap[keyDefault] = prop.Default
 		}
 
-		propertiesMap[prop.Name] = propMap
+		// }
 	}
 
 	return propertiesMap
@@ -266,18 +283,25 @@ func makeComponentSchemasMap(schemas *Schemas) map[string]interface{} {
 
 	for _, s := range *schemas {
 		scheme := make(map[string]interface{})
+		scheme[keyType] = s.Type
 
 		if s.Ref != "" {
 			scheme[keyRef] = s.Ref
-		} else {
-			scheme[keyType] = s.Type
-			schemesMap[s.Name] = scheme
-			scheme[keyProperties] = makePropertiesMap(&s.Properties)
-
-			if s.XML.Name != "" {
-				scheme[keyXML] = s.XML
-			}
 		}
+
+		if s.Items != nil {
+			scheme[keyItems] = makeItemsMap(s.Items)
+		}
+
+		if s.Properties != nil {
+			scheme[keyProperties] = makePropertiesMap(&s.Properties)
+		}
+
+		if s.XML.Name != "" {
+			scheme[keyXML] = s.XML
+		}
+
+		schemesMap[s.Name] = scheme
 	}
 
 	return schemesMap
@@ -386,4 +410,14 @@ func makeSchemaMap(schema *Schema) map[string]interface{} {
 	}
 
 	return schemaMap
+}
+
+func makeItemsMap(items *ArrayItems) map[string]interface{} {
+	itemsMap := make(map[string]interface{})
+
+	if !isStrEmpty(items.Ref) {
+		itemsMap[keyRef] = items.Ref
+	}
+
+	return itemsMap
 }

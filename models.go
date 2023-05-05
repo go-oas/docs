@@ -159,8 +159,9 @@ type Schema struct {
 	Name       string
 	Type       string
 	Properties SchemaProperties
-	XML        XMLEntry `yaml:"xml, omitempty"`
-	Ref        string   // $ref: '#/components/schemas/Pet' // TODO: Should this be omitted if empty?
+	XML        XMLEntry    `yaml:"xml, omitempty"`
+	Ref        string      `yaml:"$ref,omitempty"` // $ref: '#/components/schemas/Pet' // TODO: Should this be omitted if empty?
+	Items      *ArrayItems `yaml:"items,omitempty"`
 }
 
 // XMLEntry represents name of XML entry in Schema object.
@@ -173,12 +174,20 @@ type SchemaProperties []SchemaProperty
 
 // SchemaProperty represents OAS schema object, used by Schema.
 type SchemaProperty struct {
-	Name        string      `yaml:"-"`
-	Type        string      // OAS3.0 data types - e.g. integer, boolean, string
-	Format      string      `yaml:"format,omitempty"`
-	Description string      `yaml:"description,omitempty"`
-	Enum        []string    `yaml:"enum,omitempty"`
-	Default     interface{} `yaml:"default,omitempty"`
+	Name        string            `yaml:"-"`
+	Type        string            // OAS3.0 data types - e.g. integer, boolean, string
+	Format      string            `yaml:"format,omitempty"`
+	Description string            `yaml:"description,omitempty"`
+	Ref         string            `yaml:"$ref,omitempty"`
+	Enum        []string          `yaml:"enum,omitempty"`
+	Default     interface{}       `yaml:"default,omitempty"`
+	Properties  *SchemaProperties `yaml:"properties,omitempty"`
+	Items       *ArrayItems       `yaml:"items,omitempty"`
+}
+
+type ArrayItems struct {
+	Properties *SchemaProperties `yaml:"properties,omitempty"`
+	Ref        string            `yaml:"$ref,omitempty"`
 }
 
 // SecuritySchemes is a slice of SecuritySchemes objects.
