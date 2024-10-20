@@ -53,7 +53,7 @@ next, or what should be the priority for our roadmap. :muscle: :tada:
 
 ## How to use
 
-For more explicit example, please refer to [docs/examples](https://github.com/go-oas/docs/examples)
+For more explicit example, please refer to [docs/examples](https://github.com/go-oas/docs/tree/main/examples)
 
 Add OAS TAG to your existing handler that handles fetching of a User:
 
